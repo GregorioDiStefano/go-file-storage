@@ -3,5 +3,6 @@
     "MaxSize": 1000000,
     "OverMaxSizeStr": "File too big!",
     "KeySize": 8,
-    "StorageFolder": "files"
+    "StorageFolder": "files",
+    "ServerPort":  "127.0.0.1:8080"
 }

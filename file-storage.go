@@ -105,7 +105,7 @@ func upload(c *gin.Context) {
 	db := database{filename: dbFilename, bucket: bucket}
 	db.writeStoredFile(sf)
 
-	c.String(http.StatusOK, Key)
+	c.String(http.StatusOK, fmt.Sprintf(Key))
 }
 
 func init() {
@@ -117,5 +117,5 @@ func main() {
 
 	router.POST("/upload", upload)
 	router.GET("/:key/:filename", fileDownloader)
-	router.Run(":8080")
+	router.Run(helpers.Config.ServerPort)
 }
