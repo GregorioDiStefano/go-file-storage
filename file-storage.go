@@ -29,8 +29,11 @@ type StoredFile struct {
 }
 
 func processUpload(file multipart.File, key string, fn string) {
-	os.Mkdir("files/"+key, 0777)
-	f, err := os.OpenFile("files/"+key+"/"+fn, os.O_CREATE|os.O_WRONLY, 0777)
+	directoryToCreate := fmt.Sprintf("%s/%s/", helpers.Config.StorageFolder, key)
+	fileToCreate := fmt.Sprintf("%s/%s/%s", helpers.Config.StorageFolder, key, fn)
+
+	os.Mkdir(directoryToCreate, 0777)
+	f, err := os.OpenFile(fileToCreate, os.O_CREATE|os.O_WRONLY, 0777)
 	defer f.Close()
 
 	if err != nil {
@@ -49,7 +52,21 @@ func processUpload(file multipart.File, key string, fn string) {
 	}
 }
 
-//func upload(rw http.ResponseWriter, req *http.Request) {
+func fileDownloader(c *gin.Context) {
+	expectedFilePath := fmt.Sprintf("%s/%s/%s",
+		helpers.Config.StorageFolder,
+		c.Param("key"),
+		c.Param("filename"))
+
+	if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) {
+		fmt.Print(expectedFilePath + " does not exist.")
+		c.String(http.StatusForbidden, "Doesn't look like that file exists.")
+		return
+	}
+
+	c.File(expectedFilePath)
+}
+
 func upload(c *gin.Context) {
 	FileSize, _ := strconv.ParseInt(c.Request.Header.Get("Content-Length"),
 		10,
@@ -86,7 +103,6 @@ func upload(c *gin.Context) {
 		UploadTime}
 
 	db := database{filename: dbFilename, bucket: bucket}
-	fmt.Println(sf)
 	db.writeStoredFile(sf)
 
 	c.String(http.StatusOK, Key)
@@ -100,5 +116,6 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/upload", upload)
+	router.GET("/:key/:filename", fileDownloader)
 	router.Run(":8080")
 }
