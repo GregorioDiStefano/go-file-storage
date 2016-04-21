@@ -1,6 +1,6 @@
 {
     "MaxDownloadsBeforeInteraction": 100,
-    "MaxSize": 1000000,
+    "MaxSize": 10000000,
     "OverMaxSizeStr": "File too big!",
     "KeySize": 8,
     "StorageFolder": "files",
