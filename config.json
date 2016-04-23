@@ -1,8 +1,9 @@
 {
     "MaxDownloadsBeforeInteraction": 100,
-    "MaxSize": 10000000,
+    "MaxSize": 50000000,
     "OverMaxSizeStr": "File too big!",
-    "KeySize": 8,
+    "KeySize": 4,
+    "DeleteKeySize": 8,
     "StorageFolder": "files",
-    "ServerPort":  "127.0.0.1:8080"
+    "ServerPort":  "0.0.0.0:8080"
 }

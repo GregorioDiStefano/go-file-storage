@@ -27,16 +27,24 @@ type StoredFile struct {
 }
 
 func fileDownloader(c *gin.Context) {
+	key := c.Param("key")
+	fn := c.Param("filename")
 	expectedFilePath := fmt.Sprintf("%s/%s/%s",
 		helpers.Config.StorageFolder,
-		c.Param("key"),
-		c.Param("filename"))
+		key,
+		fn)
 
 	if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) {
 		fmt.Print(expectedFilePath + " does not exist.")
 		c.String(http.StatusForbidden, "Doesn't look like that file exists.")
 		return
 	}
+	db := database{filename: dbFilename, bucket: bucket}
+	sf := db.readStoredFile(key)
+    sf.Downloads = sf.Downloads + 1
+    db.writeStoredFile(*sf)
+	fmt.Println(sf)
+
 	c.File(expectedFilePath)
 }
 
@@ -47,7 +55,6 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.POST("/", upload)
 	router.PUT("/:filename", simpleUpload)
 	router.GET("/:key/:filename", fileDownloader)
 	router.Run(helpers.Config.ServerPort)

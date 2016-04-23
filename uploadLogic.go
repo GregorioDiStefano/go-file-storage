@@ -13,6 +13,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func findUnsedKey(d database) string {
+	count := 0
+	possibleKey := helpers.RandomString(helpers.Config.KeySize)
+	for d.doesKeyExist(possibleKey) {
+		possibleKey = helpers.RandomString(helpers.Config.KeySize + uint8(count/10))
+		count++
+	}
+	return possibleKey
+}
+
 func checkUploadSize(c *gin.Context) (int64, error) {
 	FileSize, _ := strconv.ParseInt(c.Request.Header.Get("Content-Length"),
 		10,

@@ -11,6 +11,7 @@ var Config Configuration
 
 type Configuration struct {
 	KeySize                       uint8
+	DeleteKeySize                 uint8
 	MaxDownloadsBeforeInteraction int64
 	MaxSize                       int64
 	OverMaxSizeStr                string
