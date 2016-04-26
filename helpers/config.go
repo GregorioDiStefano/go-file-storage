@@ -40,6 +40,7 @@ func checkParsedValues() {
 
 func ParseConfig() {
 	file, err := os.Open("config.json")
+
 	if err != nil {
 		panic("quitting, due to problem reading config.json:" + err.Error())
 	}

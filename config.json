@@ -1,9 +1,10 @@
 {
-    "MaxDownloadsBeforeInteraction": 100,
+    "MaxDownloadsBeforeInteraction": 10,
     "MaxSize": 50000000,
     "OverMaxSizeStr": "File too big!",
     "KeySize": 4,
     "DeleteKeySize": 8,
     "StorageFolder": "files",
-    "ServerPort":  "0.0.0.0:8080"
+    "ServerPort":  "0.0.0.0:8080",
+    "Domain": "http://localhost:8080"
 }
