@@ -18,7 +18,7 @@ func SimpleUpload(c *gin.Context) {
 
 	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
 	fn := c.Param("filename")
-	key := models.FindUnsedKey(db)
+	key := db.FindUnsedKey()
 	deleteKey := helpers.RandomString(helpers.Config.DeleteKeySize)
 
 	processUpload(c.Request.Body, key, fn)

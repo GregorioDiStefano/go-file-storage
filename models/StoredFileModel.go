@@ -4,10 +4,12 @@ import (
 	"../helpers"
 	"encoding/json"
 	"errors"
-	"fmt"
+	_ "fmt"
 	"github.com/boltdb/bolt"
 	"time"
 )
+
+var boltdb *bolt.DB
 
 const (
 	DbFilename = "files.db"
@@ -28,10 +30,18 @@ type StoredFile struct {
 	UploadTime time.Time
 }
 
-func FindUnsedKey(d Database) string {
+func (database *Database) OpenDatabaseFile() {
+	var err error
+	boltdb, err = bolt.Open(database.Filename, 0600, nil)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (database *Database) FindUnsedKey() string {
 	count := 0
 	possibleKey := helpers.RandomString(helpers.Config.KeySize)
-	for d.DoesKeyExist(possibleKey) {
+	for database.DoesKeyExist(possibleKey) {
 		possibleKey = helpers.RandomString(helpers.Config.KeySize + uint8(count/10))
 		count++
 	}
@@ -39,10 +49,8 @@ func FindUnsedKey(d Database) string {
 }
 
 func (database *Database) DoesKeyExist(key string) bool {
-	db, _ := bolt.Open(database.Filename, 0600, nil)
-	defer db.Close()
 
-	err := db.View(func(tx *bolt.Tx) error {
+	err := boltdb.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(database.Bucket))
 		record := b.Get([]byte(key))
 		if len(record) > 0 {
@@ -58,14 +66,7 @@ func (database *Database) DoesKeyExist(key string) bool {
 }
 
 func (database *Database) WriteStoredFile(sf StoredFile) error {
-	db, err := bolt.Open(database.Filename, 0600, nil)
-	defer db.Close()
-
-	if err != nil {
-		panic("Unable to open database for writing")
-	}
-
-	err = db.Update(func(tx *bolt.Tx) error {
+	err := boltdb.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(database.Bucket))
 		if err != nil {
 			return err
@@ -84,24 +85,20 @@ func (database *Database) WriteStoredFile(sf StoredFile) error {
 }
 
 func (database *Database) ReadStoredFile(key string) *StoredFile {
-	db, err := bolt.Open(database.Filename, 0666, &bolt.Options{ReadOnly: true})
-	defer db.Close()
-
-	if err != nil {
-		fmt.Println(err.Error())
-		panic("Unable to open database for reading:" + err.Error())
-	}
 
 	var sf *StoredFile
 
-	err = db.View(func(tx *bolt.Tx) error {
+	err := boltdb.View(func(tx *bolt.Tx) error {
+		var err error
 		b := tx.Bucket([]byte(database.Bucket))
-
 		sf, err = decode(b.Get([]byte(key)))
-		fmt.Println(sf, err)
 
-		return nil
+		return err
 	})
+
+	if err != nil || sf == nil {
+		panic(err)
+	}
 
 	return sf
 }

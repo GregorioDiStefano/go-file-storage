@@ -3,11 +3,14 @@ package main
 import (
 	"./controllers"
 	"./helpers"
+	"./models"
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
+	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
 	helpers.ParseConfig()
+	db.OpenDatabaseFile()
 }
 
 func main() {
