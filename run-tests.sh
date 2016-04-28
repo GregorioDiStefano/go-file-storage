@@ -14,7 +14,6 @@ function upload_file {
 go build .
 
 #upload_file
-
 (cd controllers && go test -cover -c && cp controllers.test ../)
-./controllers.test uploadRoutes_test.go
+./controllers.test
 rm controllers.test

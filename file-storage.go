@@ -18,7 +18,7 @@ func main() {
 
 	router.GET("/", controller.IndexPage)
 	router.PUT("/:filename", controller.SimpleUpload)
-	router.GET("/:key/:filename", controller.FileDownloader)
-	router.DELETE("/:key/:delete_key", controller.DeleteFile)
+	router.GET("/:key/:filename", controller.DownloadFile)
+	router.DELETE("/:key/:delete_key/:filename", controller.DeleteFile)
 	router.Run(helpers.Config.ServerPort)
 }

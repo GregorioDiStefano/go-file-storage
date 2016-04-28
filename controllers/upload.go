@@ -34,7 +34,7 @@ func SimpleUpload(c *gin.Context) {
 
 	returnJSON := make(map[string]string)
 	returnJSON["downloadURL"] = fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, fn)
-	returnJSON["deleteURL"] = fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, deleteKey)
+	returnJSON["deleteURL"] = fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, key, deleteKey, fn)
 
 	jsonString, _ := json.Marshal(returnJSON)
 
