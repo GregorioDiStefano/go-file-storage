@@ -13,6 +13,7 @@ import (
 func SimpleUpload(c *gin.Context) {
 
 	if _, err := checkUploadSize(c); err != nil {
+		c.String(http.StatusForbidden, "Upload too large")
 		return
 	}
 

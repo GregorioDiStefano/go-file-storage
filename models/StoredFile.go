@@ -27,6 +27,7 @@ type StoredFile struct {
 	FileSize   int64
 	DeleteKey  string
 	Downloads  int64
+	LastAccess time.Time
 	UploadTime time.Time
 }
 

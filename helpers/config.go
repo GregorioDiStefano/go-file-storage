@@ -38,8 +38,8 @@ func checkParsedValues() {
 	}
 }
 
-func ParseConfig() {
-	file, err := os.Open("config.json")
+func ParseConfig(filename string) {
+	file, err := os.Open(filename)
 
 	if err != nil {
 		panic("quitting, due to problem reading config.json:" + err.Error())

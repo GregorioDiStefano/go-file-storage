@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
+	"time"
 )
 
 func DownloadFile(c *gin.Context) {
@@ -31,6 +32,8 @@ func DownloadFile(c *gin.Context) {
 	}
 
 	sf := db.ReadStoredFile(key)
+
+	sf.LastAccess = time.Now().UTC()
 
 	if sf.Downloads > helpers.Config.MaxDownloadsBeforeInteraction {
 		c.String(http.StatusForbidden, "This file has been download too many times.")

@@ -15,5 +15,5 @@ go build .
 
 #upload_file
 (cd controllers && go test -cover -c && cp controllers.test ../)
-./controllers.test
+./controllers.test -test.v
 rm controllers.test

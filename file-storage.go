@@ -9,7 +9,7 @@ import (
 
 func init() {
 	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
-	helpers.ParseConfig()
+	helpers.ParseConfig("config.json")
 	db.OpenDatabaseFile()
 }
 
