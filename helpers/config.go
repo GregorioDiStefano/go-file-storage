@@ -18,6 +18,7 @@ type Configuration struct {
 	StorageFolder                 string
 	Domain                        string
 	ServerPort                    string
+	CaptchaSecret                 string
 }
 
 func checkParsedValues() {

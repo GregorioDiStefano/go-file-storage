@@ -15,6 +15,7 @@ func init() {
 
 func main() {
 	router := gin.Default()
+	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", controller.IndexPage)
 	router.PUT("/:filename", controller.SimpleUpload)
