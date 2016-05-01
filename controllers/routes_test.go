@@ -63,7 +63,7 @@ func deletePathToMap(path string) map[string]string {
 
 func TestMain(m *testing.M) {
 	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
-	helpers.ParseConfig("config.testing.json")
+	helpers.ParseConfig("config/config.testing.json")
 	db.OpenDatabaseFile()
 
 	r = gin.Default()
@@ -83,10 +83,10 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func uploadFile(data []byte) uploadedFileInfo {
+func uploadFile(data []byte, filename string) uploadedFileInfo {
 	var dl map[string]string
 
-	w := performRequest(r, "PUT", "/test", data)
+	w := performRequest(r, "PUT", "/"+filename, data)
 
 	if err := json.Unmarshal(w.Body.Bytes(), &dl); err != nil {
 		panic(err)
@@ -97,7 +97,7 @@ func uploadFile(data []byte) uploadedFileInfo {
 
 func TestUpload_1byte(t *testing.T) {
 	data := []byte{0x01}
-	uf := uploadFile(data)
+	uf := uploadFile(data, "test123")
 
 	w := performRequest(r, "GET", uf.downloadURL, nil)
 	assert.Equal(t, uf.payload, w.Body.Bytes())
@@ -105,7 +105,7 @@ func TestUpload_1byte(t *testing.T) {
 
 func TestUpload_10MB(t *testing.T) {
 	data := []byte{0x01}
-	uf := uploadFile(bytes.Repeat(data, 10000000))
+	uf := uploadFile(bytes.Repeat(data, 10000000), "test1234")
 
 	w := performRequest(r, "GET", uf.downloadURL, nil)
 	assert.Equal(t, uf.payload, w.Body.Bytes())
@@ -146,7 +146,7 @@ func TestUploadExceedingMaxSize(t *testing.T) {
 }
 
 func TestInvalidDownload_1(t *testing.T) {
-	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024*1024))
+	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024*1024), "test")
 	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 
 	key := downloadURL["key"]
@@ -158,7 +158,7 @@ func TestInvalidDownload_1(t *testing.T) {
 }
 
 func TestInvalidDownload_2(t *testing.T) {
-	ufl := uploadFile(bytes.Repeat([]byte{0x00, 0x11}, 1024*1024))
+	ufl := uploadFile(bytes.Repeat([]byte{0x00, 0x11}, 1024*1024), "test")
 	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 
 	key := downloadURL["key"] + ".x"
@@ -169,35 +169,41 @@ func TestInvalidDownload_2(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
-func TestDownloads(t *testing.T) {
-	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024))
+func TestMaxDownloads(t *testing.T) {
+	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
+	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33, 0xff}, 1024), "test")
 
-	for i := int64(0); i <= helpers.Config.MaxDownloadsBeforeInteraction; i++ {
+	for i := int64(1); i <= helpers.Config.MaxDownloadsBeforeInteraction; i++ {
 		w := performRequest(r, "GET", ufl.downloadURL, nil)
 		assert.Equal(t, ufl.payload, w.Body.Bytes())
+		assert.Equal(t, http.StatusOK, w.Code)
 	}
+
+	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+	downloadsStoredInDB := db.ReadStoredFile(downloadURLPath["key"]).Downloads
+	assert.Equal(t, helpers.Config.MaxDownloadsBeforeInteraction, downloadsStoredInDB)
 
 	w := performRequest(r, "GET", ufl.downloadURL, nil)
 	downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 	assert.Equal(t, http.StatusForbidden, w.Code)
+}
 
-	w = performRequest(r, "DELETE", ufl.deleteURL, []byte("TestData"))
+func TestDeleteFile(t *testing.T) {
+	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33, 0xff}, 1024), "test")
 
-	w = performRequest(r, "GET", ufl.downloadURL, nil)
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	w := performRequest(r, "GET", ufl.downloadURL, nil)
+	assert.Equal(t, http.StatusOK, w.Code)
 
-	invalidDownload := "/abcdef/1234.ext"
-	w = performRequest(r, "GET", invalidDownload, nil)
-	assert.Equal(t, http.StatusForbidden, w.Code)
+	w = performRequest(r, "DELETE", ufl.deleteURL, nil)
+	assert.Equal(t, http.StatusOK, w.Code)
 
-	invalidDeleteURL := "/abcdef/cfxada/1234.ext"
-	w = performRequest(r, "DELETE", invalidDeleteURL, nil)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	w = performRequest(r, "DELETE", ufl.deleteURL, nil)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 func TestDownloadLastAccess(t *testing.T) {
 	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
-	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024))
+	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024), "test")
 	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 	performRequest(r, "GET", ufl.downloadURL, nil)
 	expectedTime := db.ReadStoredFile(downloadURLPath["key"]).LastAccess.Unix()
@@ -205,8 +211,16 @@ func TestDownloadLastAccess(t *testing.T) {
 	assert.Equal(t, expectedTime, time.Now().Unix())
 }
 
+func TestUploadDownloadUnicode(t *testing.T) {
+	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024), "Шဩ.ext")
+	assert.True(t, strings.Contains(ufl.downloadURL, "Шဩ.ext"))
+
+	w := performRequest(r, "GET", ufl.downloadURL, nil)
+	assert.Equal(t, ufl.payload, w.Body.Bytes())
+}
+
 func TestDeleteInvalid_1(t *testing.T) {
-	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024))
+	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024), "test")
 	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, helpers.Config.Domain, "", 1))
 
 	key := deleteURL["key"]
@@ -219,7 +233,7 @@ func TestDeleteInvalid_1(t *testing.T) {
 }
 
 func TestDeleteInvalid_2(t *testing.T) {
-	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024))
+	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024), "test")
 	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, helpers.Config.Domain, "", 1))
 
 	key := deleteURL["key"]
@@ -232,7 +246,7 @@ func TestDeleteInvalid_2(t *testing.T) {
 }
 
 func TestDeleteInvalid_3(t *testing.T) {
-	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024))
+	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024), "test")
 	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, helpers.Config.Domain, "", 1))
 
 	invalidKey := deleteURL["key"] + ".x"

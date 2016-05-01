@@ -1,6 +1,6 @@
 {
     "MaxDownloadsBeforeInteraction": 10,
-    "MaxSize": 50000000,
+    "MaxSize": 5000000000,
     "OverMaxSizeStr": "File too big!",
     "KeySize": 4,
     "DeleteKeySize": 8,
