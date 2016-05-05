@@ -1,21 +1,22 @@
 package main
 
 import (
-	"./controllers"
-	"./helpers"
-	"./models"
+	"github.com/GregorioDiStefano/go-file-storage/controllers"
+	"github.com/GregorioDiStefano/go-file-storage/helpers"
+	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
-	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
 	helpers.ParseConfig("config/config.json")
-	db.OpenDatabaseFile()
+	models.DB.OpenDatabaseFile()
 }
 
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
+
+	go deleteUnusedFile()
 
 	router.GET("/", controller.IndexPage)
 	router.PUT("/:filename", controller.SimpleUpload)

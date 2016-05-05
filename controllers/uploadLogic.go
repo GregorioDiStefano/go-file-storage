@@ -9,7 +9,7 @@ import (
 	"os"
 	"strconv"
 
-	"../helpers"
+	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/gin-gonic/gin"
 )
 

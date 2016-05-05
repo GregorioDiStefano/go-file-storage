@@ -1,14 +1,10 @@
 package controller
 
 import (
-	"../helpers"
-	"../models"
 	"bytes"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,6 +12,11 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/GregorioDiStefano/go-file-storage/helpers"
+	"github.com/GregorioDiStefano/go-file-storage/models"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 var r *gin.Engine
@@ -62,11 +63,16 @@ func deletePathToMap(path string) map[string]string {
 }
 
 func TestMain(m *testing.M) {
-	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
+
+	if err := os.Chdir("../"); err != nil {
+		panic(err)
+	}
+
 	helpers.ParseConfig("config/config.testing.json")
-	db.OpenDatabaseFile()
+	models.DB.OpenDatabaseFile()
 
 	r = gin.Default()
+	r.LoadHTMLGlob("templates/*")
 
 	r.PUT("/:filename", func(c *gin.Context) {
 		SimpleUpload(c)
@@ -154,7 +160,7 @@ func TestInvalidDownload_1(t *testing.T) {
 
 	invalidDownloadURL := fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, invalidFilename)
 	w := performRequest(r, "GET", invalidDownloadURL, nil)
-	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestInvalidDownload_2(t *testing.T) {
@@ -198,7 +204,7 @@ func TestDeleteFile(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	w = performRequest(r, "DELETE", ufl.deleteURL, nil)
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestDownloadLastAccess(t *testing.T) {
@@ -229,7 +235,7 @@ func TestDeleteInvalid_1(t *testing.T) {
 
 	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, key, deleteKey, invalidFilename)
 	w := performRequest(r, "DELETE", invalidDeleteURL, nil)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestDeleteInvalid_2(t *testing.T) {
@@ -242,7 +248,7 @@ func TestDeleteInvalid_2(t *testing.T) {
 
 	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, key, invalidDeleteKey, filename)
 	w := performRequest(r, "DELETE", invalidDeleteURL, nil)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestDeleteInvalid_3(t *testing.T) {
@@ -255,5 +261,5 @@ func TestDeleteInvalid_3(t *testing.T) {
 
 	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, invalidKey, deleteKey, filename)
 	w := performRequest(r, "DELETE", invalidDeleteURL, nil)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }

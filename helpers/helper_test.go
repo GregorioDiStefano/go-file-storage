@@ -1,9 +1,10 @@
 package helpers
 
 import (
-	"github.com/stretchr/testify/assert"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRandomString(t *testing.T) {
@@ -25,12 +26,12 @@ func TestRandomString(t *testing.T) {
 }
 
 func TestIsWebBrowser(t *testing.T) {
-	assert.True(t, isWebBrowser("Chrome"))
-	assert.True(t, isWebBrowser("chrome"))
-	assert.True(t, isWebBrowser("safari"))
-	assert.False(t, isWebBrowser("curl"))
-	assert.False(t, isWebBrowser("wget"))
-	assert.False(t, isWebBrowser("Wget"))
+	assert.True(t, IsWebBrowser("Chrome"))
+	assert.True(t, IsWebBrowser("chrome"))
+	assert.True(t, IsWebBrowser("safari"))
+	assert.False(t, IsWebBrowser("curl"))
+	assert.False(t, IsWebBrowser("wget"))
+	assert.False(t, IsWebBrowser("Wget"))
 }
 
 func BenchmarkRandomString(b *testing.B) {

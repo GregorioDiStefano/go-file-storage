@@ -10,15 +10,17 @@ import (
 var Config Configuration
 
 type Configuration struct {
-	KeySize                       uint8
-	DeleteKeySize                 uint8
-	MaxDownloadsBeforeInteraction int64
-	MaxSize                       int64
-	OverMaxSizeStr                string
-	StorageFolder                 string
-	Domain                        string
-	ServerPort                    string
-	CaptchaSecret                 string
+	KeySize                        uint8
+	DeleteKeySize                  uint8
+	MaxDownloadsBeforeInteraction  int64
+	MaxSize                        int64
+	DeleteAfterSecondsLastAccessed int64
+	FileCheckFrequency             uint
+	OverMaxSizeStr                 string
+	StorageFolder                  string
+	Domain                         string
+	ServerPort                     string
+	CaptchaSecret                  string
 }
 
 func checkParsedValues() {

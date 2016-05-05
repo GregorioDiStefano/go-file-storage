@@ -24,6 +24,10 @@ func RandomString(length uint8) string {
 func IsWebBrowser(userAgent string) bool {
 	cliClients := []string{"wget", "curl"}
 
+	if userAgent == "" {
+		return false
+	}
+
 	//check if the user agent contains a substr from cliClients
 	for _, cliUA := range cliClients {
 		cliUA := strings.ToLower(cliUA)

@@ -1,12 +1,14 @@
 package models
 
 import (
-	"../helpers"
 	"encoding/json"
 	"errors"
 	_ "fmt"
-	"github.com/boltdb/bolt"
 	"time"
+
+	"github.com/boltdb/bolt"
+
+	"github.com/GregorioDiStefano/go-file-storage/helpers"
 )
 
 var boltdb *bolt.DB
@@ -26,10 +28,13 @@ type StoredFile struct {
 	FileName   string
 	FileSize   int64
 	DeleteKey  string
+	Deleted    bool
 	Downloads  int64
 	LastAccess time.Time
 	UploadTime time.Time
 }
+
+var DB = Database{Filename: DbFilename, Bucket: Bucket}
 
 func (database *Database) OpenDatabaseFile() {
 	var err error
@@ -53,6 +58,11 @@ func (database *Database) DoesKeyExist(key string) bool {
 
 	err := boltdb.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(database.Bucket))
+
+		if b == nil {
+			return nil
+		}
+
 		record := b.Get([]byte(key))
 		if len(record) > 0 {
 			return errors.New("Key exists")
@@ -102,6 +112,21 @@ func (database *Database) ReadStoredFile(key string) *StoredFile {
 	}
 
 	return sf
+}
+
+func (database *Database) GetAllKeys() *[]string {
+	var totalKeys []string
+	boltdb.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(database.Bucket))
+		c := b.Cursor()
+
+		for k, _ := c.First(); k != nil; k, _ = c.Next() {
+			totalKeys = append(totalKeys, string(k))
+		}
+
+		return nil
+	})
+	return &totalKeys
 }
 
 func decode(data []byte) (*StoredFile, error) {

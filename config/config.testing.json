@@ -6,5 +6,7 @@
     "DeleteKeySize": 32,
     "StorageFolder": "files",
     "ServerPort":  "0.0.0.0:8080",
-    "Domain": "http://localhost:8080"
+    "Domain": "http://localhost:8080",
+    "FileCheckFrequency": 10,
+    "DeleteAfterSecondsLastAccessed": 10
 }

@@ -1,20 +1,20 @@
 package controller
 
 import (
-	"../helpers"
-	"../models"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/GregorioDiStefano/go-file-storage/helpers"
+	"github.com/GregorioDiStefano/go-file-storage/models"
+	"github.com/gin-gonic/gin"
 )
 
 func checkCaptcha(gRecaptchaResponse string) bool {
-
 	secret := helpers.Config.CaptchaSecret
 	response := gRecaptchaResponse
 
@@ -35,18 +35,17 @@ func checkCaptcha(gRecaptchaResponse string) bool {
 			return true
 		}
 	}
-
 	return false
 }
 
 func DownloadFile(c *gin.Context) {
-	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
+
 	key := c.Param("key")
 	fn := c.Param("filename")
 	googleCaptchaCode := c.Query("g-recaptcha-response")
 
-	if db.DoesKeyExist(key) == false {
-		c.String(http.StatusForbidden, "Invalid key")
+	if models.DB.DoesKeyExist(key) == false {
+		sendError(c, "Invalid file key")
 		return
 	}
 
@@ -56,12 +55,16 @@ func DownloadFile(c *gin.Context) {
 		fn)
 
 	if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) {
-		fmt.Print(expectedFilePath + " does not exist.")
-		c.String(http.StatusNotFound, "Doesn't look like that file exists.")
+		sendError(c, "File does not exist")
 		return
 	}
 
-	sf := db.ReadStoredFile(key)
+	sf := models.DB.ReadStoredFile(key)
+
+	if sf.Deleted {
+		sendError(c, "Sorry, this file has been deleted")
+	}
+
 	sf.LastAccess = time.Now().UTC()
 
 	if sf.Downloads >= helpers.Config.MaxDownloadsBeforeInteraction && !checkCaptcha(googleCaptchaCode) {
@@ -71,12 +74,14 @@ func DownloadFile(c *gin.Context) {
 			})
 			return
 		}
-		c.String(http.StatusForbidden, "This file has been download too many times.")
+
+		sendError(c, "This file has been download too many times, visit the URL with a Browser")
 		return
+
 	}
 
 	sf.Downloads = sf.Downloads + 1
-	db.WriteStoredFile(*sf)
+	models.DB.WriteStoredFile(*sf)
 
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", sf.FileName))
 	c.File(expectedFilePath)
