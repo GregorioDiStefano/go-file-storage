@@ -17,10 +17,14 @@ type Configuration struct {
 	DeleteAfterSecondsLastAccessed int64
 	FileCheckFrequency             uint
 	OverMaxSizeStr                 string
-	StorageFolder                  string
-	Domain                         string
-	ServerPort                     string
-	CaptchaSecret                  string
+
+	Domain        string
+	ServerPort    string
+	CaptchaSecret string
+
+	StorageFolder string
+	AccessKey     string
+	SecretKey     string
 }
 
 func checkParsedValues() {

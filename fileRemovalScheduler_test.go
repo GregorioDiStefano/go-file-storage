@@ -20,12 +20,9 @@ func TestDeleteUnusedFile(t *testing.T) {
 	helpers.Config.FileCheckFrequency = 1
 	helpers.Config.DeleteAfterSecondsLastAccessed = 10
 
-	key := models.DB.FindUnsedKey()
-	deleteKey := helpers.RandomString(helpers.Config.DeleteKeySize)
-
 	simpleStoredFiled := models.StoredFile{
-		Key:        key,
-		DeleteKey:  deleteKey,
+		Key:        models.DB.FindUnsedKey(),
+		DeleteKey:  helpers.RandomString(helpers.Config.DeleteKeySize),
 		FileName:   "deleteFile",
 		FileSize:   1024,
 		UploadTime: time.Now().UTC(),
@@ -37,9 +34,11 @@ func TestDeleteUnusedFile(t *testing.T) {
 
 	go deleteUnusedFile()
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(5 * time.Second)
+	//after 5 seconds, the file will still be here
 	assert.False(t, sf.Deleted)
 	time.Sleep(15 * time.Second)
+	//but now it should be gone.
 	sf = models.DB.ReadStoredFile(simpleStoredFiled.Key)
 	assert.True(t, sf.Deleted)
 }

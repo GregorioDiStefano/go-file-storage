@@ -208,13 +208,24 @@ func TestDeleteFile(t *testing.T) {
 }
 
 func TestDownloadLastAccess(t *testing.T) {
-	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
 	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024), "test")
 	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 	performRequest(r, "GET", ufl.downloadURL, nil)
-	expectedTime := db.ReadStoredFile(downloadURLPath["key"]).LastAccess.Unix()
+	expectedTime := models.DB.ReadStoredFile(downloadURLPath["key"]).LastAccess.Unix()
 
 	assert.Equal(t, expectedTime, time.Now().Unix())
+}
+
+func TestDownloadDeletedFile(t *testing.T) {
+	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024), "random.ext")
+	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+
+	storedFile := models.DB.ReadStoredFile(downloadURLPath["key"])
+	storedFile.Deleted = true
+	models.DB.WriteStoredFile(*storedFile)
+
+	w := performRequest(r, "GET", ufl.downloadURL, nil)
+	assert.Equal(t, http.StatusForbidden, w.Code)
 }
 
 func TestUploadDownloadUnicode(t *testing.T) {
