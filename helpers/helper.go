@@ -1,9 +1,13 @@
 package helpers
 
 import (
+	"fmt"
+	"log"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/cloudfront/sign"
 )
 
 func init() {
@@ -37,4 +41,21 @@ func IsWebBrowser(userAgent string) bool {
 		}
 	}
 	return true
+}
+
+func GetS3SignedURL(key string, filename string) string {
+	privKey, err := sign.LoadPEMPrivKeyFile("/home/greg/Desktop/keys/pk-APKAIWSICRWRZP4KRDWA.pem")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	signer := sign.NewURLSigner("APKAIWSICRWRZP4KRDWA", privKey)
+	s3URL := fmt.Sprintf("https://dssdldrogwhnn.cloudfront.net/%s/%s", key, filename)
+	signedURL, err := signer.Sign(s3URL, time.Now().Add(1*time.Hour))
+	if err != nil {
+		log.Fatalf("Failed to sign url, err: %s\n", err.Error())
+	}
+
+	return signedURL
 }

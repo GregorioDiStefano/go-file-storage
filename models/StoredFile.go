@@ -24,14 +24,15 @@ type Database struct {
 }
 
 type StoredFile struct {
-	Key        string
-	FileName   string
-	FileSize   int64
-	DeleteKey  string
-	Deleted    bool
-	Downloads  int64
-	LastAccess time.Time
-	UploadTime time.Time
+	Key           string
+	FileName      string
+	FileSize      int64
+	DeleteKey     string
+	Deleted       bool
+	Downloads     int64
+	LastAccess    time.Time
+	UploadTime    time.Time
+	StorageMethod string
 }
 
 var DB = Database{Filename: DbFilename, Bucket: Bucket}

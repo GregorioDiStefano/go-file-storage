@@ -10,6 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	LOCAL = "local"
+	S3    = "S3"
+)
+
 func SimpleUpload(c *gin.Context) {
 
 	if _, err := checkUploadSize(c); err != nil {
@@ -21,15 +26,24 @@ func SimpleUpload(c *gin.Context) {
 	key := models.DB.FindUnsedKey()
 	deleteKey := helpers.RandomString(helpers.Config.DeleteKeySize)
 
-	processUpload(c.Request.Body, key, fn)
+	fmt.Print(helpers.Config.StorageMethod)
+
+	if helpers.Config.StorageMethod == LOCAL {
+		processUpload(c.Request.Body, key, fn)
+	} else if helpers.Config.StorageMethod == S3 {
+		if err := processUploadS3(c.Request.Body, key, fn); err != nil {
+			panic(err)
+		}
+	}
 
 	simpleStoredFiled := models.StoredFile{
-		Key:        key,
-		DeleteKey:  deleteKey,
-		FileName:   fn,
-		FileSize:   c.Request.ContentLength,
-		UploadTime: time.Now().UTC(),
-		LastAccess: time.Now().UTC(),
+		Key:           key,
+		DeleteKey:     deleteKey,
+		FileName:      fn,
+		FileSize:      c.Request.ContentLength,
+		UploadTime:    time.Now().UTC(),
+		LastAccess:    time.Now().UTC(),
+		StorageMethod: helpers.Config.StorageMethod,
 	}
 
 	models.DB.WriteStoredFile(simpleStoredFiled)

@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/gin-gonic/gin"
+	"github.com/rlmcpherson/s3gof3r"
 )
 
 func checkUploadSize(c *gin.Context) (int64, error) {
@@ -28,11 +28,39 @@ func checkUploadSize(c *gin.Context) (int64, error) {
 	return FileSize, nil
 }
 
-func processUpload(data interface{}, key string, fn string) {
+func processUploadS3(data io.ReadCloser, key string, fn string) error {
+	S3Keys := s3gof3r.Keys{AccessKey: helpers.Config.AccessKey,
+		SecretKey: helpers.Config.SecretKey}
+
+	// Open bucket to put file into
+	s3 := s3gof3r.New("s3-eu-west-1.amazonaws.com", S3Keys)
+	b := s3.Bucket("greg-filestorage")
+
+	w, err := b.PutWriter(fmt.Sprintf("%s/%s", key, fn), nil, nil)
+
+	if err != nil {
+		fmt.Println("1: ", err)
+		return err
+	}
+
+	// Copy into S3
+	if _, err = io.Copy(w, data); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	if err = w.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func processUpload(data io.ReadCloser, key string, fn string) {
 	directoryToCreate := fmt.Sprintf("%s/%s/", helpers.Config.StorageFolder, key)
 	fileToCreate := fmt.Sprintf("%s/%s/%s", helpers.Config.StorageFolder, key, fn)
 
 	os.Mkdir(directoryToCreate, 0777)
+
 	f, err := os.OpenFile(fileToCreate, os.O_CREATE|os.O_WRONLY, 0777)
 	defer f.Close()
 
@@ -40,21 +68,5 @@ func processUpload(data interface{}, key string, fn string) {
 		panic(err)
 	}
 
-	for {
-		tmp := make([]byte, 512*1024)
-		var count int
-
-		switch data.(type) {
-		case multipart.File:
-			count, _ = data.(multipart.File).Read(tmp)
-		case io.ReadCloser:
-			count, _ = data.(io.ReadCloser).Read(tmp)
-		}
-
-		if count > 0 {
-			f.Write(tmp[0:count])
-		} else {
-			break
-		}
-	}
+	io.Copy(f, data)
 }

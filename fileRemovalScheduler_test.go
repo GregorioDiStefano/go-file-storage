@@ -12,11 +12,10 @@ import (
 
 func TestMain(m *testing.M) {
 	helpers.ParseConfig("config/config.testing.json")
-	//models.DB.OpenDatabaseFile()
 	os.Exit(m.Run())
 }
 
-func TestDeleteUnusedFile(t *testing.T) {
+func TestDeleteUnusedFile_1(t *testing.T) {
 	helpers.Config.FileCheckFrequency = 1
 	helpers.Config.DeleteAfterSecondsLastAccessed = 10
 

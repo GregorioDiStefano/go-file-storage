@@ -54,12 +54,11 @@ func DownloadFile(c *gin.Context) {
 		key,
 		fn)
 
-	if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) {
+	sf := models.DB.ReadStoredFile(key)
+	if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) && sf.StorageMethod == LOCAL {
 		sendError(c, "File does not exist")
 		return
 	}
-
-	sf := models.DB.ReadStoredFile(key)
 
 	if sf.Deleted {
 		sendError(c, "Sorry, this file has been deleted")
@@ -71,18 +70,25 @@ func DownloadFile(c *gin.Context) {
 		if helpers.IsWebBrowser(c.Request.Header.Get("User-Agent")) {
 			c.HTML(http.StatusOK, "download.tmpl", gin.H{
 				"filename": fn,
+				"url":      "http://cloudfrontURL",
 			})
 			return
 		}
 
 		sendError(c, "This file has been download too many times, visit the URL with a Browser")
 		return
-
 	}
 
 	sf.Downloads = sf.Downloads + 1
 	models.DB.WriteStoredFile(*sf)
 
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", sf.FileName))
-	c.File(expectedFilePath)
+	if sf.StorageMethod == S3 {
+		c.Redirect(http.StatusTemporaryRedirect, helpers.GetS3SignedURL(sf.Key, sf.FileName))
+		return
+	} else if sf.StorageMethod == LOCAL {
+		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", sf.FileName))
+		c.File(expectedFilePath)
+		return
+	}
+	sendError(c, "Error locating the file you requested!")
 }

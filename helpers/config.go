@@ -22,9 +22,11 @@ type Configuration struct {
 	ServerPort    string
 	CaptchaSecret string
 
+	AccessKey string
+	SecretKey string
+
+	StorageMethod string
 	StorageFolder string
-	AccessKey     string
-	SecretKey     string
 }
 
 func checkParsedValues() {
@@ -39,6 +41,8 @@ func checkParsedValues() {
 				fmt.Println("ServerPort not set, using 8080 as default")
 				Config.ServerPort = "127.0.0.1:8080"
 			}
+			//		} else if field == "StorageMethod" && value.(string) != "S3" || value.(string) != "local" {
+			//			panic("StorageMethod in configuration file is incorrect, specify S3 or local")
 		} else if value == nil || value == reflect.Zero(reflect.TypeOf(value)).Interface() {
 			fmt.Printf("Warning: no value set for field: %s\n", field)
 		}
@@ -54,6 +58,7 @@ func ParseConfig(filename string) {
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&Config)
+	fmt.Println(Config)
 
 	checkParsedValues()
 
