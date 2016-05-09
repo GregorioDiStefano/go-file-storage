@@ -26,13 +26,12 @@ func SimpleUpload(c *gin.Context) {
 	key := models.DB.FindUnsedKey()
 	deleteKey := helpers.RandomString(helpers.Config.DeleteKeySize)
 
-	fmt.Print(helpers.Config.StorageMethod)
-
 	if helpers.Config.StorageMethod == LOCAL {
 		processUpload(c.Request.Body, key, fn)
 	} else if helpers.Config.StorageMethod == S3 {
 		if err := processUploadS3(c.Request.Body, key, fn); err != nil {
-			panic(err)
+			sendError(c, "Uploading file to S3 bucket failed!")
+			return
 		}
 	}
 

@@ -33,8 +33,8 @@ func processUploadS3(data io.ReadCloser, key string, fn string) error {
 		SecretKey: helpers.Config.SecretKey}
 
 	// Open bucket to put file into
-	s3 := s3gof3r.New("s3-eu-west-1.amazonaws.com", S3Keys)
-	b := s3.Bucket("greg-filestorage")
+	s3 := s3gof3r.New(helpers.Config.AWSRegion, S3Keys)
+	b := s3.Bucket(helpers.Config.S3BucketName)
 
 	w, err := b.PutWriter(fmt.Sprintf("%s/%s", key, fn), nil, nil)
 

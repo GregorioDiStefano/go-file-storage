@@ -44,33 +44,34 @@ func DownloadFile(c *gin.Context) {
 	fn := c.Param("filename")
 	googleCaptchaCode := c.Query("g-recaptcha-response")
 
-	if models.DB.DoesKeyExist(key) == false {
-		sendError(c, "Invalid file key")
-		return
-	}
-
-	expectedFilePath := fmt.Sprintf("%s/%s/%s",
-		helpers.Config.StorageFolder,
-		key,
-		fn)
-
+	var expectedFilePath string
 	sf := models.DB.ReadStoredFile(key)
-	if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) && sf.StorageMethod == LOCAL {
-		sendError(c, "File does not exist")
+
+	if !models.DB.DoesKeyExist(key) || sf.Deleted {
+		sendError(c, "Invalid file key or file is deleted")
 		return
 	}
 
-	if sf.Deleted {
-		sendError(c, "Sorry, this file has been deleted")
+	if sf.StorageMethod == LOCAL {
+
+		expectedFilePath = fmt.Sprintf("%s/%s/%s",
+			helpers.Config.StorageFolder,
+			key,
+			fn)
+
+		if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) {
+			sendError(c, "File does not exist")
+			return
+		}
 	}
 
 	sf.LastAccess = time.Now().UTC()
 
+	//if file has been download too many times, show this page, with requires a captcha to be solved
 	if sf.Downloads >= helpers.Config.MaxDownloadsBeforeInteraction && !checkCaptcha(googleCaptchaCode) {
 		if helpers.IsWebBrowser(c.Request.Header.Get("User-Agent")) {
 			c.HTML(http.StatusOK, "download.tmpl", gin.H{
 				"filename": fn,
-				"url":      "http://cloudfrontURL",
 			})
 			return
 		}
@@ -83,12 +84,11 @@ func DownloadFile(c *gin.Context) {
 	models.DB.WriteStoredFile(*sf)
 
 	if sf.StorageMethod == S3 {
-		c.Redirect(http.StatusTemporaryRedirect, helpers.GetS3SignedURL(sf.Key, sf.FileName))
+		c.Redirect(http.StatusMovedPermanently, helpers.GetS3SignedURL(sf.Key, sf.FileName))
 		return
 	} else if sf.StorageMethod == LOCAL {
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", sf.FileName))
 		c.File(expectedFilePath)
 		return
 	}
-	sendError(c, "Error locating the file you requested!")
 }

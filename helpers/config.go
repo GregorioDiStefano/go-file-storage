@@ -22,8 +22,13 @@ type Configuration struct {
 	ServerPort    string
 	CaptchaSecret string
 
-	AccessKey string
-	SecretKey string
+	AccessKey                    string
+	SecretKey                    string
+	AWSRegion                    string
+	CloudFrontPrivateKeyLocation string
+	S3BucketName                 string
+	CloudFrontKeyID              string
+	CloudFrontURL                string
 
 	StorageMethod string
 	StorageFolder string
