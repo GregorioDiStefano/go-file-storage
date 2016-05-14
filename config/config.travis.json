@@ -1,0 +1,21 @@
+{
+    "MaxDownloadsBeforeInteraction": 10,
+    "MaxSize": 5000000000,
+    "OverMaxSizeStr": "File too big!",
+    "KeySize": 4,
+    "DeleteKeySize": 8,
+    "StorageFolder": "files",
+    "ServerPort":  "0.0.0.0:8080",
+    "Domain": "http://localhost:8080",
+    "FileCheckFrequency": 1,
+    "DeleteAfterSecondsLastAccessed": 2500,
+    "CAPTCHA_SECRET": "environment",
+    "AWS_ACCESS_KEY_ID": "environment",
+    "AWS_SECRET_ACCESS_KEY": "environment",
+    "StorageMethod" : "S3",
+    "CloudFrontPrivateKeyLocation": "./config/pk-APKAIWSICRWRZP4KRDWA.pem",
+    "S3BucketName": "greg-filestorage",
+    "AWSRegion": "eu-west-1",
+    "CloudFrontKeyID" : "APKAIWSICRWRZP4KRDWA",
+    "CloudFrontURL" : "dssdldrogwhnn.cloudfront.net"
+}
