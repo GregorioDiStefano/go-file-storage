@@ -8,9 +8,12 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
 	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/gin-gonic/gin"
-	"github.com/rlmcpherson/s3gof3r"
 )
 
 func checkUploadSize(c *gin.Context) (int64, error) {
@@ -29,29 +32,17 @@ func checkUploadSize(c *gin.Context) (int64, error) {
 }
 
 func processUploadS3(data io.ReadCloser, key string, fn string) error {
-	S3Keys := s3gof3r.Keys{AccessKey: helpers.Config.AccessKey,
-		SecretKey: helpers.Config.SecretKey}
-
-	// Open bucket to put file into
-	s3 := s3gof3r.New(helpers.Config.AWSRegion, S3Keys)
-	b := s3.Bucket(helpers.Config.S3BucketName)
-
-	w, err := b.PutWriter(fmt.Sprintf("%s/%s", key, fn), nil, nil)
+	uploader := s3manager.NewUploader(session.New(&aws.Config{Region: aws.String(helpers.Config.AWSRegion)}))
+	_, err := uploader.Upload(&s3manager.UploadInput{
+		Body:   data,
+		Bucket: aws.String(helpers.Config.S3BucketName),
+		Key:    aws.String(fmt.Sprintf("%s/%s", key, fn)),
+	})
 
 	if err != nil {
-		fmt.Println("1: ", err)
 		return err
 	}
 
-	// Copy into S3
-	if _, err = io.Copy(w, data); err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	if err = w.Close(); err != nil {
-		return err
-	}
 	return nil
 }
 
