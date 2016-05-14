@@ -233,7 +233,7 @@ func TestDownloadLastAccess(t *testing.T) {
 	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 	performRequest(r, "GET", ufl.downloadURL, nil)
 	expectedTime := models.DB.ReadStoredFile(downloadURLPath["key"]).LastAccess.Unix()
-	assert.Equal(t, expectedTime, time.Now().Unix())
+	assert.True(t, expectedTime == time.Now().Unix() || expectedTime+1 == time.Now().Unix())
 }
 
 func TestDownloadDeletedFile(t *testing.T) {
