@@ -5,10 +5,15 @@ import (
 	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/gin-gonic/gin"
+	"os"
 )
 
 func init() {
-	helpers.ParseConfig("config/config.json")
+	configFile := os.Getenv("CONFIG_FILE")
+	if configFile == "" {
+		panic("No CONFIG_FILE set")
+	}
+	helpers.ParseConfig(configFile)
 	models.DB.OpenDatabaseFile()
 }
 
