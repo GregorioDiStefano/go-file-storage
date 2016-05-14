@@ -123,10 +123,10 @@ func TestUpload_1byte(t *testing.T) {
 	data := []byte{0x01}
 	uf := uploadFile(data, "test123")
 
-	respBytes, _, httpCode := performRequest(r, "GET", uf.downloadURL, nil)
+	respBytes, _, statusCode := performRequest(r, "GET", uf.downloadURL, nil)
 
 	assert.Equal(t, uf.payload, respBytes)
-	assert.Equal(t, http.StatusOK, httpCode)
+	assert.Equal(t, http.StatusOK, statusCode)
 }
 
 func TestUpload_10MB(t *testing.T) {
@@ -172,7 +172,6 @@ func TestUploadExceedingMaxSize(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, statusCode)
 }
 
-/*
 func TestInvalidDownload_1(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024*1024), "test")
 	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
@@ -181,20 +180,20 @@ func TestInvalidDownload_1(t *testing.T) {
 	invalidFilename := downloadURL["filename"] + ".x"
 
 	invalidDownloadURL := fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, invalidFilename)
-	w := performRequest(r, "GET", invalidDownloadURL, nil)
-	assert.Equal(t, http.StatusForbidden, w.Code)
+	_, _, statusCode := performRequest(r, "GET", invalidDownloadURL, nil)
+	assert.Equal(t, http.StatusForbidden, statusCode)
 }
 
 func TestInvalidDownload_2(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0x00, 0x11}, 1024*1024), "test")
 	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 
-	key := downloadURL["key"] + ".x"
+	key := downloadURL["key"] + "foo"
 	invalidFilename := downloadURL["filename"]
 
 	invalidDownloadURL := fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, invalidFilename)
-	w := performRequest(r, "GET", invalidDownloadURL, nil)
-	assert.Equal(t, http.StatusForbidden, w.Code)
+	_, _, statusCode := performRequest(r, "GET", invalidDownloadURL, nil)
+	assert.Equal(t, http.StatusForbidden, statusCode)
 }
 
 func TestMaxDownloads(t *testing.T) {
@@ -202,21 +201,19 @@ func TestMaxDownloads(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33, 0xff}, 1024), "test")
 
 	for i := int64(1); i <= helpers.Config.MaxDownloadsBeforeInteraction; i++ {
-		w := performRequest(r, "GET", ufl.downloadURL, nil)
-		assert.Equal(t, ufl.payload, w.Body.Bytes())
-		assert.Equal(t, http.StatusOK, w.Code)
+		respBytes, _, statusCode := performRequest(r, "GET", ufl.downloadURL, nil)
+		assert.Equal(t, ufl.payload, respBytes)
+		assert.Equal(t, http.StatusOK, statusCode)
 	}
 
 	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 	downloadsStoredInDB := db.ReadStoredFile(downloadURLPath["key"]).Downloads
 	assert.Equal(t, helpers.Config.MaxDownloadsBeforeInteraction, downloadsStoredInDB)
 
-	w := performRequest(r, "GET", ufl.downloadURL, nil)
+	_, _, statusCode := performRequest(r, "GET", ufl.downloadURL, nil)
 	downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
-	assert.Equal(t, http.StatusForbidden, w.Code)
+	assert.Equal(t, http.StatusForbidden, statusCode)
 }
-
-*/
 
 func TestDeleteFile(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33, 0xff}, 1024), "test")
@@ -232,11 +229,10 @@ func TestDeleteFile(t *testing.T) {
 }
 
 func TestDownloadLastAccess(t *testing.T) {
-	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024), "test")
+	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 10), "test")
 	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
 	performRequest(r, "GET", ufl.downloadURL, nil)
 	expectedTime := models.DB.ReadStoredFile(downloadURLPath["key"]).LastAccess.Unix()
-
 	assert.Equal(t, expectedTime, time.Now().Unix())
 }
 
@@ -253,7 +249,6 @@ func TestDownloadDeletedFile(t *testing.T) {
 }
 
 func TestUploadDownloadUnicode(t *testing.T) {
-	//t.Skip("This doesnt work on S3!")
 	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024), "testҖ.ext")
 	assert.True(t, strings.Contains(ufl.downloadURL, "testҖ.ext"))
 

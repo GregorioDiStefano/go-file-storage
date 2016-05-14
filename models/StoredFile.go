@@ -109,7 +109,8 @@ func (database *Database) ReadStoredFile(key string) *StoredFile {
 	})
 
 	if err != nil || sf == nil {
-		panic(err)
+		//TODO: log
+		return nil
 	}
 
 	return sf

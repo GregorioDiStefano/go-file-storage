@@ -18,12 +18,12 @@ type Configuration struct {
 	FileCheckFrequency             uint
 	OverMaxSizeStr                 string
 
-	Domain        string
-	ServerPort    string
-	CaptchaSecret string
+	Domain         string
+	ServerPort     string
+	CAPTCHA_SECRET string
 
-	AccessKey                    string
-	SecretKey                    string
+	AWS_ACCESS_KEY_ID            string
+	AWS_SECRET_ACCESS_KEY        string
 	AWSRegion                    string
 	CloudFrontPrivateKeyLocation string
 	S3BucketName                 string
@@ -50,6 +50,12 @@ func checkParsedValues() {
 			//			panic("StorageMethod in configuration file is incorrect, specify S3 or local")
 		} else if value == nil || value == reflect.Zero(reflect.TypeOf(value)).Interface() {
 			fmt.Printf("Warning: no value set for field: %s\n", field)
+		} else if value == "environment" {
+			if os.Getenv(field) == "" {
+				fmt.Println("Error: ", field, " is missing")
+			} else if field == "CAPTCHA_SECRET" {
+				Config.CAPTCHA_SECRET = os.Getenv("CAPTCHA_SECRET")
+			}
 		}
 	}
 }
@@ -63,7 +69,6 @@ func ParseConfig(filename string) {
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&Config)
-	fmt.Println(Config)
 
 	checkParsedValues()
 

@@ -15,7 +15,7 @@ import (
 )
 
 func checkCaptcha(gRecaptchaResponse string) bool {
-	secret := helpers.Config.CaptchaSecret
+	secret := helpers.Config.CAPTCHA_SECRET
 	response := gRecaptchaResponse
 
 	postURL := "https://www.google.com/recaptcha/api/siteverify"
@@ -47,13 +47,12 @@ func DownloadFile(c *gin.Context) {
 	var expectedFilePath string
 	sf := models.DB.ReadStoredFile(key)
 
-	if !models.DB.DoesKeyExist(key) || sf.Deleted {
-		sendError(c, "Invalid file key or file is deleted")
+	if !models.DB.DoesKeyExist(key) || sf == nil || sf.Deleted || sf.FileName != fn {
+		sendError(c, "Invalid filename, key, or file is deleted")
 		return
 	}
 
 	if sf.StorageMethod == LOCAL {
-
 		expectedFilePath = fmt.Sprintf("%s/%s/%s",
 			helpers.Config.StorageFolder,
 			key,
@@ -84,7 +83,8 @@ func DownloadFile(c *gin.Context) {
 	models.DB.WriteStoredFile(*sf)
 
 	if sf.StorageMethod == S3 {
-		c.Redirect(http.StatusMovedPermanently, helpers.GetS3SignedURL(sf.Key, sf.FileName))
+		ip := helpers.GetXFF(c.Request.Header)
+		c.Redirect(http.StatusMovedPermanently, helpers.GetS3SignedURL(sf.Key, sf.FileName, ip))
 		return
 	} else if sf.StorageMethod == LOCAL {
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", sf.FileName))

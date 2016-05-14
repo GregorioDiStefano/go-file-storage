@@ -2,12 +2,15 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/cloudfront/sign"
+
 	"log"
 	"math/rand"
+	"net"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/cloudfront/sign"
 )
 
 func init() {
@@ -43,19 +46,52 @@ func IsWebBrowser(userAgent string) bool {
 	return true
 }
 
-func GetS3SignedURL(key string, filename string) string {
+func GetXFF(headers map[string][]string) string {
+	fmt.Println("headers: ", headers)
+	all, ok := headers["X-Forwarded-For"]
+
+	if !ok {
+		return ""
+	}
+	fmt.Println("XFF: ", all)
+	possibleIP := all[0]
+	if net.ParseIP(possibleIP) != nil {
+		return possibleIP
+	}
+	return ""
+}
+
+func GetS3SignedURL(key string, filename, ip string) string {
 	privKey, err := sign.LoadPEMPrivKeyFile(Config.CloudFrontPrivateKeyLocation)
+
+	var signedURL string
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	signer := sign.NewURLSigner(Config.CloudFrontKeyID, privKey)
-	filenameEscaped := url.QueryEscape(filename)
 
+	filenameEscaped := url.QueryEscape(filename)
 	s3URL := fmt.Sprintf("https://%s/%s/%s", Config.CloudFrontURL, key, filenameEscaped)
 
-	signedURL, err := signer.Sign(s3URL, time.Now().Add(1*time.Hour))
+	policy := &sign.Policy{
+		Statements: []sign.Statement{
+			{
+				Resource: s3URL,
+				Condition: sign.Condition{
+					IPAddress:    &sign.IPAddress{SourceIP: ""},
+					DateLessThan: &sign.AWSEpochTime{time.Now().Add(1 * time.Hour)},
+				},
+			},
+		},
+	}
+
+	if len(ip) > 0 {
+		signedURL, err = signer.SignWithPolicy(s3URL, policy)
+	} else {
+		signedURL, err = signer.Sign(s3URL, time.Now().Add(1*time.Hour))
+	}
 
 	if err != nil {
 		log.Fatalf("Failed to sign url, err: %s\n", err.Error())

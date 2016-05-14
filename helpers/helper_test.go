@@ -34,6 +34,15 @@ func TestIsWebBrowser(t *testing.T) {
 	assert.False(t, IsWebBrowser("Wget"))
 }
 
+func TestGetXFF(t *testing.T) {
+	assert.Equal(t, "1.1.1.1", GetXFF(map[string][]string{"X-Forwarded-For": {"1.1.1.1"}}))
+
+	assert.Equal(t, "1.1.1.1", GetXFF(map[string][]string{"X-Forwarded-For": {"1.1.1.1", "6.6.6.6"}}))
+
+	assert.Equal(t, "", GetXFF(map[string][]string{"Xff": {"1.1.1.1", "6.6.6.6"}}))
+
+}
+
 func BenchmarkRandomString(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		RandomString(10)
