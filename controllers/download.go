@@ -88,7 +88,7 @@ func DownloadFile(c *gin.Context) {
 	}
 
 	sf.Downloads = sf.Downloads + 1
-	log.WithFields(log.Fields{"key": key, "filename": fn}).Info("Downloads set to ", sf.Downloads)
+	helpers.Log.WithFields(log.Fields{"key": key, "filename": fn}).Info("Downloads set to ", sf.Downloads)
 	models.DB.WriteStoredFile(*sf)
 
 	if sf.StorageMethod == S3 {
