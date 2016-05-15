@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
+
 	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/gin-gonic/gin"
@@ -39,15 +41,21 @@ func checkCaptcha(gRecaptchaResponse string) bool {
 }
 
 func DownloadFile(c *gin.Context) {
-
 	key := c.Param("key")
 	fn := c.Param("filename")
 	googleCaptchaCode := c.Query("g-recaptcha-response")
+
+	helpers.Log.WithFields(log.Fields{"key": key, "fn": fn}).Info("Incoming download.")
 
 	var expectedFilePath string
 	sf := models.DB.ReadStoredFile(key)
 
 	if !models.DB.DoesKeyExist(key) || sf == nil || sf.Deleted || sf.FileName != fn {
+		if sf == nil {
+			helpers.Log.WithFields(log.Fields{"key": key, "fn": fn}).Error("Download failed since key doesn't exist in database")
+		} else {
+			helpers.Log.WithFields(log.Fields{"key": key, "fn": fn, "delete": sf.Deleted}).Error("Download failed")
+		}
 		sendError(c, "Invalid filename, key, or file is deleted")
 		return
 	}
@@ -80,6 +88,7 @@ func DownloadFile(c *gin.Context) {
 	}
 
 	sf.Downloads = sf.Downloads + 1
+	log.WithFields(log.Fields{"key": key, "filename": fn}).Info("Downloads set to ", sf.Downloads)
 	models.DB.WriteStoredFile(*sf)
 
 	if sf.StorageMethod == S3 {

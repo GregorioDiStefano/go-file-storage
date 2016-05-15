@@ -1,14 +1,16 @@
 package main
 
 import (
+	"os"
+
 	"github.com/GregorioDiStefano/go-file-storage/controllers"
 	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/gin-gonic/gin"
-	"os"
 )
 
 func init() {
+
 	configFile := os.Getenv("CONFIG_FILE")
 	if configFile == "" {
 		panic("No CONFIG_FILE set")
@@ -20,7 +22,9 @@ func init() {
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
+	defer models.DB.CloseDatabaseFile()
 
+	helpers.Log.Info("Starting.....")
 	go deleteUnusedFile()
 
 	router.GET("/", controller.IndexPage)

@@ -45,6 +45,10 @@ func (database *Database) OpenDatabaseFile() {
 	}
 }
 
+func (database *Database) CloseDatabaseFile() {
+	DB.CloseDatabaseFile()
+}
+
 func (database *Database) FindUnsedKey() string {
 	count := 0
 	possibleKey := helpers.RandomString(helpers.Config.KeySize)

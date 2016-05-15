@@ -2,19 +2,31 @@ package helpers
 
 import (
 	"fmt"
-
 	"log"
+	"os"
+
 	"math/rand"
 	"net"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/service/cloudfront/sign"
 )
 
+var Log = logrus.New()
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
+
+	f, err := os.OpenFile("go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	Log.Out = f
+	Log.Level = logrus.InfoLevel
 }
 
 func RandomString(length uint8) string {
