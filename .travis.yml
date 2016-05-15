@@ -16,7 +16,10 @@ before_install:
 
 script:
 - go test -v ./...
-before_deploy:
-- docker build -t gregdistefano/go-fileshare .
-- docker push gregdisstefano/go-fileshare
+- go build .
 
+after_script:
+- docker login --email=$DOCKER_EMAIL --username=$DOCKER_USERNAME --password=$DOCKER_PASSWORD
+- docker build -t gregdistefano/go-fileshare:latest .
+- docker tag gregdistefano/go-fileshare:latest latest
+- docker push gregdistefano/go-fileshare:latest
