@@ -67,6 +67,7 @@ func DownloadFile(c *gin.Context) {
 			fn)
 
 		if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) {
+			helpers.Log.WithFields(log.Fields{"expected file path": expectedFilePath}).Info("file not found on filesystem!")
 			sendError(c, "File does not exist")
 			return
 		}
@@ -83,6 +84,7 @@ func DownloadFile(c *gin.Context) {
 			return
 		}
 
+		helpers.Log.WithFields(log.Fields{"key": key, "filename": fn}).Info("File downloads exceeded - not web browser")
 		sendError(c, "This file has been download too many times, visit the URL with a Browser")
 		return
 	}
@@ -93,9 +95,11 @@ func DownloadFile(c *gin.Context) {
 
 	if sf.StorageMethod == S3 {
 		ip := helpers.GetXFF(c.Request.Header)
+		helpers.Log.WithFields(log.Fields{"ip": ip, "key": key, "fn": fn}).Info("S3 download started.")
 		c.Redirect(http.StatusMovedPermanently, helpers.GetS3SignedURL(sf.Key, sf.FileName, ip))
 		return
 	} else if sf.StorageMethod == LOCAL {
+		helpers.Log.WithFields(log.Fields{"key": key, "fn": fn}).Info("S3 download started.")
 		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", sf.FileName))
 		c.File(expectedFilePath)
 		return
