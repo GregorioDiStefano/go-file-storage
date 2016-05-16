@@ -41,6 +41,7 @@ func RandomString(length uint8) string {
 
 func IsWebBrowser(userAgent string) bool {
 	cliClients := []string{"wget", "curl"}
+	userAgent = strings.ToLower(userAgent)
 
 	if userAgent == "" {
 		return false
@@ -49,7 +50,6 @@ func IsWebBrowser(userAgent string) bool {
 	//check if the user agent contains a substr from cliClients
 	for _, cliUA := range cliClients {
 		cliUA := strings.ToLower(cliUA)
-		userAgent := strings.ToLower(userAgent)
 		if strings.Contains(userAgent, cliUA) {
 			return false
 		}
@@ -67,7 +67,6 @@ func GetS3SignedURL(key string, filename, ip string) string {
 	}
 
 	signer := sign.NewURLSigner(Config.CloudFrontKeyID, privKey)
-
 	filenameEscaped := url.QueryEscape(filename)
 	s3URL := fmt.Sprintf("https://%s/%s/%s", Config.CloudFrontURL, key, filenameEscaped)
 
