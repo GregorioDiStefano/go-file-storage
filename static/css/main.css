@@ -1,0 +1,27 @@
+h4 {
+  font-family: 'Anonymous Pro';
+  font-weight: normal;
+  text-align: center;
+}
+
+body {
+  background:#d2dfe6;
+  color: #444;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  line-height: 1.5em;
+}
+
+#mainDemo{
+  width: 60%;
+  margin-top:40px;
+	margin-left: auto;
+	margin-right: auto;
+  margin-bottom:40px;
+  min-width: 500px;
+  background: #fff;
+  border-radius: 5px;
+  -webkit-box-shadow: 0px 0px 20px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 20px rgba(0,0,0,0.75);
+  /*-webkit-transition:all 0.5s; */
+  overflow: hidden;
+}

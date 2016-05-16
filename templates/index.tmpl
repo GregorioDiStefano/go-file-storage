@@ -1,14 +1,55 @@
+
 <html>
-    <head>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Anonymous+Pro' rel='stylesheet' type='text/css'>
+  <link href='static/css/main.css' rel='stylesheet' type='text/css'>
+  <link href='static/css/term.css' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<h4>
+  Quickly share files from the command line or webapp
+</h4>
 
-    </head>
-    <body>
-        <h1>
-            Index page
-        </h1>
-
-
-
-
-    </body>
+<div id="mainDemo">
+ 	<div id="toolbar">
+		<div class="top">
+			<div id="lights">
+				<div class="light red">
+					<div class="glyph">×</div>
+					<div class="shine"></div>
+					<div class="glow"></div>
+				</div>
+				<div class="light yellow">
+					<div class="glyph">-</div>
+					<div class="shine"></div>
+					<div class="glow"></div>
+				</div>
+				<div class="light green">
+					<div class="glyph">+</div>
+					<div class="shine"></div>
+					<div class="glow"></div>
+				</div>
+			</div>
+			<div id="title">
+				<div class="folder">
+					<div class="tab"></div>
+					<div class="body"></div>
+				</div>
+				go
+			</div>
+			<div id="bubble">
+				<div class="shine"></div>
+				<div class="glow"></div>
+			</div>
+		</div>
+	</div>
+	<div id="body">
+		<p>greg@ns329543:~/Downloads$ curl --upload-file ffmpeg.tar http://url.no</p>
+    <p>
+      {"downloadURL":"http://url.no/cvch/ffmpeg.tar","deleteURL":"http://url.no/cvch/tWgeUaLv/ffmpeg.tar"}
+    </p>
+		<div class="cursor"></div>
+	</div>
+</div>
+</body>
 </html>
