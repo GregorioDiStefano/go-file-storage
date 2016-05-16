@@ -1,5 +1,8 @@
 
 <html>
+  <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <script src="/static/js/main.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.0.4/ng-file-upload-all.min.js"></script>
 <head>
   <link href='https://fonts.googleapis.com/css?family=Anonymous+Pro' rel='stylesheet' type='text/css'>
   <link href='static/css/main.css' rel='stylesheet' type='text/css'>
@@ -30,13 +33,6 @@
 					<div class="glow"></div>
 				</div>
 			</div>
-			<div id="title">
-				<div class="folder">
-					<div class="tab"></div>
-					<div class="body"></div>
-				</div>
-				go
-			</div>
 			<div id="bubble">
 				<div class="shine"></div>
 				<div class="glow"></div>
@@ -44,12 +40,43 @@
 		</div>
 	</div>
 	<div id="body">
-		<p>greg@ns329543:~/Downloads$ curl --upload-file ffmpeg.tar http://url.no</p>
+		<p>$ curl --upload-file ffmpeg.tar http://url.no</p>
     <p>
       {"downloadURL":"http://url.no/cvch/ffmpeg.tar","deleteURL":"http://url.no/cvch/tWgeUaLv/ffmpeg.tar"}
     </p>
+      <br> </br>
+    <p>$ curl -X DELETE http://url.no/cvch/tWgeUaLv/ffmpeg.tar</p>
+    <p>
+      {"msg":"File deleted"}
+    </p>
 		<div class="cursor"></div>
 	</div>
+</div>
+<div id="quickUpload" ng-app="myUpload" ng-controller="uploadCtrl">
+  <p>
+    or just <a href="#" onclick="document.getElementById('uploadFile').click(); return false;"> click here </a>
+      <input type="file" ngf-select="uploadFile($file, $invalidFiles)" id="uploadFile" ngf-select ng-model="picFile" name="file"
+             accept="image/*" ngf-max-size="2000MB" required
+             ngf-model-invalid="errorFile">
+  </p>
+</div>
+<div id="icons">
+  <figure>
+    <img class="icon" src="static/icons/heart.svg"></img>
+    <figcaption> 100% free </figcaption>
+  </figure>
+  <figure>
+    <img class="icon" src="static/icons/cloud.svg"></img>
+    <figcaption> CDN based </figcaption>
+  </figure>
+  <figure>
+    <img class="icon" src="static/icons/share.svg"></img>
+    <figcaption> shareable </figcaption>
+  </figure>
+  <figure>
+    <img class="icon" src="static/icons/safety.svg"></img>
+    <figcaption> secure </figcaption>
+  </figure>
 </div>
 </body>
 </html>
