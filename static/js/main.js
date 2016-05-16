@@ -16,7 +16,7 @@ app.controller('uploadCtrl', ['$scope', 'Upload', function($scope, Upload, $http
   $scope.uploadFile = function(file) {
       file.upload = Upload.upload({
         method: 'PUT',
-        url: 'http://' + location.hostname,
+        url: 'http://' + location.hostname + "/" + file.name,
         data: {file: file},
       });
     }
