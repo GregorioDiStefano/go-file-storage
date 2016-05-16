@@ -71,19 +71,18 @@ func GetS3SignedURL(key string, filename, ip string) string {
 	filenameEscaped := url.QueryEscape(filename)
 	s3URL := fmt.Sprintf("https://%s/%s/%s", Config.CloudFrontURL, key, filenameEscaped)
 
-	policy := &sign.Policy{
-		Statements: []sign.Statement{
-			{
-				Resource: s3URL,
-				Condition: sign.Condition{
-					IPAddress:    &sign.IPAddress{SourceIP: ""},
-					DateLessThan: &sign.AWSEpochTime{time.Now().Add(1 * time.Hour)},
+	if len(ip) > 0 {
+		policy := &sign.Policy{
+			Statements: []sign.Statement{
+				{
+					Resource: s3URL,
+					Condition: sign.Condition{
+						IPAddress:    &sign.IPAddress{SourceIP: ip},
+						DateLessThan: &sign.AWSEpochTime{time.Now().Add(1 * time.Hour)},
+					},
 				},
 			},
-		},
-	}
-
-	if len(ip) > 0 {
+		}
 		signedURL, err = signer.SignWithPolicy(s3URL, policy)
 	} else {
 		signedURL, err = signer.Sign(s3URL, time.Now().Add(1*time.Hour))
