@@ -6,7 +6,7 @@
     "DeleteKeySize": 8,
     "StorageFolder": "files",
     "ServerPort":  "0.0.0.0:8080",
-    "Domain": "45.32.235.219",
+    "Domain": "http://localhost:8080",
     "FileCheckFrequency": 1,
     "DeleteAfterSecondsLastAccessed": 2500,
     "CAPTCHA_SECRET": "environment",
