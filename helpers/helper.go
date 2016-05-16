@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"math/rand"
-	"net"
 	"net/url"
 	"strings"
 	"time"
@@ -56,21 +55,6 @@ func IsWebBrowser(userAgent string) bool {
 		}
 	}
 	return true
-}
-
-func GetXFF(headers map[string][]string) string {
-	fmt.Println("headers: ", headers)
-	all, ok := headers["X-Forwarded-For"]
-
-	if !ok {
-		return ""
-	}
-	fmt.Println("XFF: ", all)
-	possibleIP := all[0]
-	if net.ParseIP(possibleIP) != nil {
-		return possibleIP
-	}
-	return ""
 }
 
 func GetS3SignedURL(key string, filename, ip string) string {

@@ -94,7 +94,7 @@ func DownloadFile(c *gin.Context) {
 	models.DB.WriteStoredFile(*sf)
 
 	if sf.StorageMethod == S3 {
-		ip := helpers.GetXFF(c.Request.Header)
+		ip := c.ClientIP()
 		helpers.Log.WithFields(log.Fields{"ip": ip, "key": key, "fn": fn}).Info("S3 download started.")
 		c.Redirect(http.StatusMovedPermanently, helpers.GetS3SignedURL(sf.Key, sf.FileName, ip))
 		return
