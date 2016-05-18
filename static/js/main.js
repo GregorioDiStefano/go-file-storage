@@ -14,10 +14,10 @@ app.directive('customOnChange', function() {
 app.controller('uploadCtrl', ['$scope', 'Upload', function($scope, Upload, $http) {
 
   $scope.uploadFile = function(file) {
-      file.upload = Upload.upload({
+      file.upload = Upload.http({
         method: 'PUT',
         url: 'http://' + location.hostname + "/" + file.name,
-        data: {file: file},
+        data: file,
       });
     }
 }]);
