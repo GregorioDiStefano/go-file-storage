@@ -27,8 +27,8 @@ figcaption {
   font-family: 'Anonymous Pro';
 }
 
-input {
-  display: none;
+input[type=file]{
+  display: none !important;
 }
 
 #icons {
@@ -54,4 +54,14 @@ input {
 #quickUpload {
   text-align: center;
   font-family: 'Anonymous Pro';
+}
+
+
+
+.horizontalCenter {
+  margin: auto;
+}
+
+#progressUpload {
+  width: 30%;
 }
