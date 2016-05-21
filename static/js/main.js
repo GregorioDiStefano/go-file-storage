@@ -53,7 +53,7 @@ app.controller('uploadCtrl', ['$scope', 'Upload', "$http", "$timeout", function(
           console.log("Uploading: ", file)
         file.upload = Upload.http({
             method: 'PUT',
-            url: 'http://' + location.hostname + "/" + file.name,
+            url: location.protocol + '//' + location.hostname + "/" + file.name,
             data: file,
         }).then(function(resp) {
             swal({

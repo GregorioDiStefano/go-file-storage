@@ -6,7 +6,7 @@
     "DeleteKeySize": 8,
     "StorageFolder": "files",
     "ServerPort":  "0.0.0.0:8080",
-    "Domain": "http://45.32.235.219",
+    "Domain": "https://grabfile.io",
     "FileCheckFrequency": 60,
     "DeleteAfterSecondsLastAccessed": 2592000,
     "CAPTCHA_SECRET": "environment",

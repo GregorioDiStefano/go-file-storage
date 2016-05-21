@@ -65,6 +65,9 @@ input[type=file]{
 }
 
 .swal-wide {
-  width: 50% !important;
-  margin-left: -25% !important;
+  display: inline;
+  /*
+  width: 40% !important;
+  margin-left: -20% !important;
+  */
 }
