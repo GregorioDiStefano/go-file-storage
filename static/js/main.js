@@ -17,35 +17,59 @@ app.directive('customOnChange', function() {
 
 var newPercent = 0;
 app.controller('uploadCtrl', ['$scope', 'Upload', "$http", "$timeout", function($scope, Upload, $http, $timeout) {
+    removeProgress = function() {
+        setTimeout(function() {
+            $scope.$apply(function() {
+                newPercent = 0
+                $scope.data = {
+                    progress: 0,
+                    show: false
+                };
+            });
+        }, 200);
+    };
+
     $scope.data = {
         progress: 0,
         show: false
     };
 
     (function progress() {
-        if ($scope.data.progress < 100) {
+        console.log($scope.data.progress)
+
             $timeout(function() {
                 if (newPercent > 0) {
-                    $scope.data.progress = newPercent
                     $scope.data.show = true
+                    $scope.data.progress = newPercent
+                    console.log("showing")
                 }
                 progress();
             }, 200);
-        }
+
     })();
 
     $scope.uploadFile = function(file) {
+        if (file) {
+          console.log("Uploading: ", file)
         file.upload = Upload.http({
             method: 'PUT',
             url: 'http://' + location.hostname + "/" + file.name,
             data: file,
         }).then(function(resp) {
-            console.log('Success ' + resp.config.file.name + 'uploaded. Response: ' + resp.data);
+            swal({
+                title: "Upload complete!",
+                text: "<p style='text-align:left'>Download URL: " + resp.data.downloadURL + "<br> Delete URL: " + resp.data.deleteURL + "</p>",
+                customClass: 'swal-wide',
+                html: true
+            });
+            removeProgress()
         }, function(resp) {
             console.log('Error status: ' + resp.status);
         }, function(evt) {
             var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
             newPercent = progressPercentage
+
         });
     }
+  }
 }]);

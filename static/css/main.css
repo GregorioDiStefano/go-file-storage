@@ -56,12 +56,15 @@ input[type=file]{
   font-family: 'Anonymous Pro';
 }
 
-
-
 .horizontalCenter {
   margin: auto;
 }
 
 #progressUpload {
   width: 30%;
+}
+
+.swal-wide {
+  width: 50% !important;
+  margin-left: -25% !important;
 }
