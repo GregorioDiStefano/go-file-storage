@@ -93,6 +93,8 @@ func DownloadFile(c *gin.Context) {
 	helpers.Log.WithFields(log.Fields{"key": key, "filename": fn}).Info("Downloads set to ", sf.Downloads)
 	models.DB.WriteStoredFile(*sf)
 
+	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+
 	if sf.StorageMethod == S3 {
 		ip := c.ClientIP()
 		helpers.Log.WithFields(log.Fields{"ip": ip, "key": key, "fn": fn}).Info("S3 download started.")
