@@ -51,5 +51,5 @@ func SimpleUpload(c *gin.Context) {
 	returnJSON["downloadURL"] = fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, fn)
 	returnJSON["deleteURL"] = fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, key, deleteKey, fn)
 
-	c.JSON(http.StatusOK, returnJSON)
+	c.JSON(http.StatusCreated, returnJSON)
 }

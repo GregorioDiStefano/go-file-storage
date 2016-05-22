@@ -19,7 +19,7 @@ var Log = logrus.New()
 func init() {
 	rand.Seed(time.Now().UnixNano())
 
-	f, err := os.OpenFile("go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
+	f, err := os.OpenFile("../go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
 		panic(err)
 	}

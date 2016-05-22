@@ -152,7 +152,7 @@ func TestUploadEqualMaxSize(t *testing.T) {
 	}
 
 	_, _, statusCode := performRequest(r, "PUT", "/hugepass", randomData)
-	assert.Equal(t, http.StatusOK, statusCode)
+	assert.Equal(t, http.StatusCreated, statusCode)
 }
 
 func TestUploadExceedingMaxSize(t *testing.T) {
