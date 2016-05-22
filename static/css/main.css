@@ -1,73 +1,87 @@
 h4 {
-  font-family: 'Anonymous Pro';
-  font-weight: normal;
-  text-align: center;
+    font-family: 'Anonymous Pro';
+    font-weight: normal;
+    text-align: center;
+    font-size: 28px;
+    margin-top: 50px;
 }
-
 body {
-  background:#d2dfe6;
-  color: #444;
-  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-  line-height: 1.5em;
+    background: #d2dfe6;
+    color: #444;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1.5em;
+    height: 100%;
 }
-
 figure .icon {
-  width: 75px;
-  height: 75px;
+    width: 75px;
+    height: 75px;
 }
-
 figure {
     text-align: center;
     display: inline-block;
-    max-width: 50%; /* demo; set some amount (px or %) if you can */
-    margin: 1px 3px 3px 3px; /* not needed unless you want centered */
+    max-width: 50%;
+    /* demo; set some amount (px or %) if you can */
+    margin: 1px 3px 3px 3px;
+    /* not needed unless you want centered */
 }
-
 figcaption {
-  font-family: 'Anonymous Pro';
+    font-family: 'Anonymous Pro';
 }
-
-input[type=file]{
-  display: none !important;
+input[type=file] {
+    display: none !important;
 }
-
 #icons {
-  margin-top: 60px;
-  text-align:center;
+    margin-top: 60px;
+    text-align: center;
+    margin-bottom: 100px;
 }
-
-#mainDemo{
-  width: 850px;
-  margin-top:40px;
-	margin-left: auto;
-	margin-right: auto;
-  margin-bottom:40px;
-  min-width: 500px;
-  background: #fff;
-  border-radius: 5px;
-  -webkit-box-shadow: 0px 0px 20px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 0px 20px rgba(0,0,0,0.75);
-  /*-webkit-transition:all 0.5s; */
-  overflow: hidden;
+#mainDemo {
+    width: 540px;
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
+    min-width: 500px;
+    background: #fff;
+    border-radius: 5px;
+    -webkit-box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.75);
+    /*-webkit-transition:all 0.5s; */
+    overflow: hidden;
 }
-
 #quickUpload {
-  text-align: center;
-  font-family: 'Anonymous Pro';
+    text-align: center;
+    font-family: 'Anonymous Pro';
 }
-
 .horizontalCenter {
-  margin: auto;
+    margin: auto;
 }
-
 #progressUpload {
-  width: 30%;
+    width: 30%;
+}
+.swal-wide {
+    display: inline;
+    width: 40% !important;
+    margin-left: -20% !important;
 }
 
-.swal-wide {
-  display: inline;
-  /*
-  width: 40% !important;
-  margin-left: -20% !important;
-  */
+#header {
+  margin: 2% 25%;
+}
+
+#header > p {
+  font-family: 'Anonymous Pro';
+  float: right;
+}
+
+#container {
+  height: 100%;
+}
+
+.about-section {
+    height: 50%;
+    padding-top: 50px;
+    text-align: center;
+    background: #eee;
+    font-family: 'Anonymous Pro';
 }

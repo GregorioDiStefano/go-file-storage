@@ -1,9 +1,10 @@
 <html ng-app="myUpload">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-<script src="/static/js/main.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.0.4/ng-file-upload-all.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.3.2/ui-bootstrap-tpls.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+<script src="/static/js/main.js"></script>
+<script src="/static/js/angular-smooth-scroll.js"></script>
 </script>
 
 <head>
@@ -15,76 +16,83 @@
 </head>
 
 <body>
-    <h4>
-  Quickly share files from the command line or webapp
-</h4>
+    <div id="container">
+        <div id="header">
+            <img src="static/icons/grabfileio.png" />
+            <p>
+                <a href="#" scroll-to="about">learn more</a>
+            </p>
+        </div>
 
-    <div id="mainDemo">
-        <div id="toolbar">
-            <div class="top">
-                <div id="lights">
-                    <div class="light red">
-                        <div class="glyph">×</div>
+        <h4>
+      Quickly share files from the command line
+    </h4>
+
+        <div id="mainDemo">
+            <div id="toolbar">
+                <div class="top">
+                    <div id="bubble">
                         <div class="shine"></div>
                         <div class="glow"></div>
                     </div>
-                    <div class="light yellow">
-                        <div class="glyph">-</div>
-                        <div class="shine"></div>
-                        <div class="glow"></div>
-                    </div>
-                    <div class="light green">
-                        <div class="glyph">+</div>
-                        <div class="shine"></div>
-                        <div class="glow"></div>
-                    </div>
-                </div>
-                <div id="bubble">
-                    <div class="shine"></div>
-                    <div class="glow"></div>
                 </div>
             </div>
+            <div id="body">
+                <p>$ curl --upload-file ffmpeg.tar https://grabfile.io/</p>
+                <pre>
+{
+  "downloadURL":"https://grabfile.io/cvch/ffmpeg.tar",
+  "deleteURL":"https://grabfile.io/cvch/tWgeUaLv/ffmpeg.tar"
+}
+            </pre>
+                <p>$ curl -X DELETE https://grabfile.io/cvch/tWgeUaLv/ffmpeg.tar</p>
+                <pre>
+{"msg":"File deleted"}
+            </pre>
+                <div class="cursor"></div>
+            </div>
         </div>
-        <div id="body">
-            <p>$ curl --upload-file ffmpeg.tar https://grabfile.io/ffmpeg.tar</p>
+        <div id="quickUpload" ng-controller="uploadCtrl">
             <p>
-                {"downloadURL":"https://grabfile.io/cvch/ffmpeg.tar","deleteURL":"https://grabfile.io/cvch/tWgeUaLv/ffmpeg.tar"}
+                or just <a href="#" onclick="document.getElementById('uploadFile').click(); return false;"> click here </a>
+                <input type="file" ngf-select="uploadFile($file, $invalidFiles)" id="uploadFile" ngf-select ng-model="ngFile" name="file" ngf-max-size="2000MB" required ngf-model-invalid="errorFile">
             </p>
-            <br> </br>
-            <p>$ curl -X DELETE https://grabfile.io/cvch/tWgeUaLv/ffmpeg.tar</p>
+        </div>
+
+        <div id="progressUpload" class="horizontalCenter">
+            <div class="progress" ng-controller="uploadCtrl" ng-show="data.show">
+                <uib-progressbar value="data.progress">[[data.progress]]</uib-progressbar>
+            </div>
+        </div>
+
+        <div id="icons">
+            <figure>
+                <img class="icon" src="static/icons/heart.svg"></img>
+                <figcaption> 100% free </figcaption>
+            </figure>
+            <figure>
+                <img class="icon" src="static/icons/cloud.svg"></img>
+                <figcaption> CDN based </figcaption>
+            </figure>
+            <figure>
+                <img class="icon" src="static/icons/safety.svg"></img>
+                <figcaption> secure </figcaption>
+            </figure>
+        </div>
+    </div>
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1>More info</h1>
+                </div>
+            </div>
             <p>
-                {"msg":"File deleted"}
+              more to come soon
             </p>
-            <div class="cursor"></div>
         </div>
-    </div>
-    <div id="quickUpload" ng-controller="uploadCtrl">
-        <p>
-            or just <a href="#" onclick="document.getElementById('uploadFile').click(); return false;"> click here </a>
-            <input type="file" ngf-select="uploadFile($file, $invalidFiles)" id="uploadFile" ngf-select ng-model="ngFile" name="file" ngf-max-size="2000MB" required ngf-model-invalid="errorFile">
-        </p>
-    </div>
-
-    <div id="progressUpload" class="horizontalCenter">
-        <div class="progress" ng-controller="uploadCtrl" ng-show="data.show">
-            <uib-progressbar value="data.progress">[[data.progress]]/100%</uib-progressbar>
-        </div>
-    </div>
-
-    <div id="icons">
-        <figure>
-            <img class="icon" src="static/icons/heart.svg"></img>
-            <figcaption> 100% free </figcaption>
-        </figure>
-        <figure>
-            <img class="icon" src="static/icons/cloud.svg"></img>
-            <figcaption> CDN based </figcaption>
-        </figure>
-        <figure>
-            <img class="icon" src="static/icons/safety.svg"></img>
-            <figcaption> secure </figcaption>
-        </figure>
-    </div>
+    </section>
 </body>
 
 </html>

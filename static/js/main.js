@@ -1,4 +1,4 @@
-var app = angular.module('myUpload', ['ngFileUpload', 'ui.bootstrap']);
+var app = angular.module('myUpload', ['smoothScroll', 'ngFileUpload', 'ui.bootstrap']);
 app.config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('[[');
     $interpolateProvider.endSymbol(']]');
@@ -17,6 +17,7 @@ app.directive('customOnChange', function() {
 
 var newPercent = 0;
 app.controller('uploadCtrl', ['$scope', 'Upload', "$http", "$timeout", function($scope, Upload, $http, $timeout) {
+
     removeProgress = function() {
         setTimeout(function() {
             $scope.$apply(function() {
@@ -35,16 +36,17 @@ app.controller('uploadCtrl', ['$scope', 'Upload', "$http", "$timeout", function(
     };
 
     (function progress() {
-        console.log($scope.data.progress)
-
             $timeout(function() {
                 if (newPercent > 0) {
                     $scope.data.show = true
                     $scope.data.progress = newPercent
-                    console.log("showing")
+                if ($scope.data.progress == 100) {
+                    console.log($scope.data.progress)
+                    $scope.data.progress = "Syncing..."
                 }
+              }
                 progress();
-            }, 200);
+            }, 50);
 
     })();
 
@@ -68,7 +70,6 @@ app.controller('uploadCtrl', ['$scope', 'Upload', "$http", "$timeout", function(
         }, function(evt) {
             var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
             newPercent = progressPercentage
-
         });
     }
   }

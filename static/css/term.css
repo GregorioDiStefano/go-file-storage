@@ -1,4 +1,17 @@
-
+#window{
+    width: 90%;
+    margin-top:40px;
+	margin-left: auto;
+	margin-right: auto;
+    margin-bottom:40px;
+    min-width: 500px;
+    background: #fff;
+    border-radius: 5px;
+    -webkit-box-shadow: 0px 0px 20px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 20px rgba(0,0,0,0.75);
+    /*-webkit-transition:all 0.5s; */
+    overflow: hidden;
+}
 
 /* TOP BAR */
 #topbar{
@@ -9,6 +22,8 @@
     text-shadow:0px 1px 0px rgba(255,255,255,0.25);
     -webkit-box-shadow:0 1px 0 rgba(0,0,0,0.5);
     -moz-box-shadow:0 1px 0 rgba(0,0,0,0.5);
+
+
 }
 #topbar ul li {
     float: left;
@@ -335,9 +350,9 @@
     min-height:130px;
     background:#000;
     padding:10px;
-    line-height:1.5em;
+    line-height:0.5em;
 }
-#body p {
+#body p, #body pre {
    color: #63de00!important;
 }
 
@@ -434,4 +449,9 @@
 }
 .icon .folder{
     margin:15px 0 0 6px;
+}
+
+#body > pre {
+    background-color: black;
+    border: 0;
 }
