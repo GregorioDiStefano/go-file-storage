@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"math/rand"
@@ -19,13 +18,16 @@ var Log = logrus.New()
 func init() {
 	rand.Seed(time.Now().UnixNano())
 
-	f, err := os.OpenFile("../go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
+	cwd, _ := os.Getwd()
+
+	f, err := os.OpenFile(cwd+"/go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
 		panic(err)
 	}
 
 	Log.Out = f
 	Log.Level = logrus.InfoLevel
+	logrus.SetFormatter(&logrus.TextFormatter{})
 }
 
 func RandomString(length uint8) string {
@@ -88,7 +90,7 @@ func GetS3SignedURL(key string, filename, ip string) string {
 	}
 
 	if err != nil {
-		log.Fatalf("Failed to sign url, err: %s\n", err.Error())
+		Log.Fatalf("Failed to sign url, err: %s\n", err.Error())
 	}
 
 	return signedURL
