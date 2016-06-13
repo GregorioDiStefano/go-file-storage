@@ -4,7 +4,7 @@
 	margin-left: auto;
 	margin-right: auto;
     margin-bottom:40px;
-    min-width: 500px;
+    min-width: 550px;
     background: #fff;
     border-radius: 5px;
     -webkit-box-shadow: 0px 0px 20px rgba(0,0,0,0.75);
@@ -353,7 +353,7 @@
     line-height:0.5em;
 }
 #body p, #body pre {
-   color: #63de00!important;
+    color: rgb(210, 223, 230) !important;
 }
 
 @keyframes blink

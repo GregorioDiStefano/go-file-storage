@@ -2,7 +2,7 @@ h4 {
     font-family: 'Anonymous Pro';
     font-weight: normal;
     text-align: center;
-    font-size: 28px;
+    font-size: 20px;
     margin-top: 50px;
 }
 body {
@@ -13,30 +13,42 @@ body {
     height: 100%;
 }
 figure .icon {
-    width: 75px;
-    height: 75px;
+    width: 60px;
+    height: 60px;
 }
 figure {
     text-align: center;
     display: inline-block;
     max-width: 50%;
     /* demo; set some amount (px or %) if you can */
-    margin: 1px 3px 3px 3px;
+    margin: 1px 50px 3px 3px;
     /* not needed unless you want centered */
 }
+
+figure:nth-child(4) {
+  margin-right: 0px
+}
+
 figcaption {
     font-family: 'Anonymous Pro';
+    font-size: 16px;
+    caption-side:bottom;
+    text-align: center;
 }
+
 input[type=file] {
     display: none !important;
 }
+
 #icons {
     margin-top: 60px;
     text-align: center;
     margin-bottom: 100px;
+    display: flex;
+    justify-content: center;
 }
 #mainDemo {
-    width: 540px;
+    width: 675px;
     margin-top: 40px;
     margin-left: auto;
     margin-right: auto;
@@ -69,17 +81,29 @@ input[type=file] {
   margin: 2% 25%;
 }
 
-#header > p {
+#header > p  {
   font-family: 'Anonymous Pro';
+}
+
+.right {
   float: right;
 }
 
+#logo {
+  display: inline;
+  color: rgb(210, 223, 230) !important;
+  font-size: 34px;
+  font-family: "Anonymous Pro";
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
 #container {
-  height: 100%;
+  min-height: 600px;
 }
 
 .about-section {
-    height: 50%;
+    height: 40%;
+    width: 100%;
     padding-top: 50px;
     text-align: center;
     background: #eee;

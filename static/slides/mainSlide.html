@@ -1,0 +1,24 @@
+<div id="mainDemo">
+    <div id="toolbar">
+        <div class="top">
+            <div id="bubble">
+                <div class="shine"></div>
+                <div class="glow"></div>
+            </div>
+        </div>
+    </div>
+    <div id="body">
+        <p>$ curl --upload-file ffmpeg.tar https://grabfile.io/</p>
+        <pre>
+{
+  "downloadURL":"https://grabfile.io/cvch/ffmpeg.tar",
+  "deleteURL":"https://grabfile.io/cvch/tWgeUaLv/ffmpeg.tar"
+}
+    </pre>
+        <p>$ curl -X DELETE https://grabfile.io/cvch/tWgeUaLv/ffmpeg.tar</p>
+        <pre>
+{"msg":"File deleted"}
+    </pre>
+        <div class="cursor"></div>
+    </div>
+</div>

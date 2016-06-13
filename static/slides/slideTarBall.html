@@ -1,0 +1,27 @@
+<div id="mainDemo">
+    <div id="toolbar">
+        <div class="top">
+            <div id="bubble">
+                <div class="shine"></div>
+                <div class="glow"></div>
+            </div>
+        </div>
+    </div>
+    <div id="body">
+        <p>
+          # Upload entire directories <br /> <br /> <br />
+          $ tar -zcf - foo/ | curl --upload-file - "https://grabfile.io/foo.tar.gz"
+        </p>
+        <br /><br />
+        <p>
+          # Upload filtered log files <br /><br /><br />
+          $ grep 'error' /var/log/syslog | curl --upload-file - https://grabfile.io/logs.txt
+        </p>
+        <br /><br />
+        <p>
+          # Encrypt and upload <br /><br /><br />
+          $ gpg -o - -c --symmetric bar | curl --upload-file - https://grabfile.io/bar
+        </p>
+        <div class="cursor"></div>
+    </div>
+</div>
