@@ -11,6 +11,9 @@ env:
 before_install:
 - mkdir files
 - go get github.com/stretchr/testify/assert
+- go get github.com/etcinit/speedbump/ginbump
+- go get github.com/etcinit/speedbump
+- go get github.com/dustin/go-humanize
 - openssl aes-256-cbc -K $encrypted_1c5f6eb52035_key -iv $encrypted_1c5f6eb52035_iv
   -in config/pk-APKAIWSICRWRZP4KRDWA.pem.enc -out config/pk-APKAIWSICRWRZP4KRDWA.pem -d
 
