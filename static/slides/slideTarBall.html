@@ -10,7 +10,7 @@
     <div id="body">
         <p>
           # Upload entire directories <br /> <br /> <br />
-          $ tar -zcf - foo/ | curl --upload-file - "https://grabfile.io/foo.tar.gz"
+          $ tar -zcf - foo/ | curl --upload-file - https://grabfile.io/foo.tar.gz
         </p>
         <br /><br />
         <p>
@@ -20,8 +20,10 @@
         <br /><br />
         <p>
           # Encrypt and upload <br /><br /><br />
-          $ gpg -o - -c --symmetric bar | curl --upload-file - https://grabfile.io/bar
+          $ gpg -o - -c --symmetric bar | curl --upload-file - https://grabfile.io/stuff.zip
         </p>
+        <br />
+        <br />
         <div class="cursor"></div>
     </div>
 </div>

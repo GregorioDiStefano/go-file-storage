@@ -67,6 +67,13 @@ app.controller('uploadCtrl', ['$scope', 'Upload', "$http", "$timeout", function(
             removeProgress()
         }, function(resp) {
             console.log('Error status: ' + resp.status);
+            if (resp.status == "429") {
+              swal({
+                title: "Oops",
+                text: "Too many requests, please try again in an hour."
+              });
+              removeProgress()
+            }
         }, function(evt) {
             var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
             newPercent = progressPercentage
