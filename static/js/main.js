@@ -60,7 +60,7 @@ app.controller('uploadCtrl', ['$scope', 'Upload', "$http", "$timeout", function(
         }).then(function(resp) {
             swal({
                 title: "Upload complete!",
-                text: "<p style='text-align:left'>Download URL: " + resp.data.downloadURL + "<br> Delete URL: " + resp.data.deleteURL + "</p>",
+                text: "<p> Download URL: " + resp.data.downloadURL + "</p><p> Delete URL: " + resp.data.deleteURL + "</p>",
                 customClass: 'swal-wide',
                 html: true
             });
