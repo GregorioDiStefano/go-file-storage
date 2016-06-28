@@ -76,6 +76,13 @@ input[type=file] {
     display: inline;
     width: 40% !important;
     margin-left: -20% !important;
+    text-align: center;
+}
+
+div.sweet-alert.swal-wide.showSweetAlert > p {
+    white-space: nowrap;
+    overflow-x: auto;
+    text-align: left;
 }
 
 #header {
