@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
@@ -17,7 +18,7 @@ func deleteUnusedFile() {
 			sf := db.ReadStoredFile(v)
 			delta := time.Now().Sub(sf.LastAccess)
 			if sf.Deleted == false && int64(delta.Seconds()) > helpers.Config.DeleteAfterSecondsLastAccessed {
-				fmt.Println("Deleting: ", sf.Key)
+				helpers.Log.WithFields(log.Fields{"filename": sf.FileName, "last_accessed": sf.LastAccess, "upload_time": sf.UploadTime}).Infoln("Removed old file.")
 				sf.Deleted = true
 				db.WriteStoredFile(*sf)
 			}

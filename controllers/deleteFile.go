@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	log "github.com/Sirupsen/logrus"
+
 	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/gin-gonic/gin"
@@ -34,11 +36,13 @@ func DeleteFile(c *gin.Context) {
 		sf := models.DB.ReadStoredFile(key)
 
 		if sf.Deleted {
+			log.WithFields(log.Fields{"key": key, "delete_key": deleteKey, "fn": fileName}).Infoln("File is already deleted")
 			sendError(c, "File is already deleted.")
 			return
 		}
 
 		if sf.DeleteKey != deleteKey || sf.FileName != fileName {
+			log.WithFields(log.Fields{"key": key, "delete_key": deleteKey, "fn": fileName}).Infoln("Delete key or filename was incorrect")
 			sendError(c, "Delete key or filename was incorrect")
 			return
 		}
@@ -55,14 +59,18 @@ func DeleteFile(c *gin.Context) {
 		}
 
 		if deleteErr != nil {
+			//log.WithFields(log.Fields{"key" : key, "delete_key": deleteKey, "fn": fileName}).Infoln("Delete key or filename was incorrect")
 			sendError(c, "Failed to delete file")
 			return
 		}
 
 		sf.Deleted = true
 		models.DB.WriteStoredFile(*sf)
+		log.WithFields(log.Fields{"key": key, "delete_key": deleteKey, "fn": fileName}).Infoln("File set to deleted.")
 		c.JSON(http.StatusOK, map[string]string{"msg": "File deleted"})
 		return
 	}
+
+	log.WithFields(log.Fields{"key": key, "delete_key": deleteKey, "fn": fileName}).Infoln("Failed to delete file.")
 	sendError(c, "Something went wrong deleting the requested file")
 }
