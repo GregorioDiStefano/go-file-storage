@@ -6,6 +6,7 @@ import (
 
 	"math/rand"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -17,7 +18,9 @@ var Log = logrus.New()
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	f, err := os.OpenFile("/var/log/"+"go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	f, err := os.OpenFile(dir+"/go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
+
 	if err != nil {
 		panic(err)
 	}
