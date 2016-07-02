@@ -20,7 +20,7 @@ func TestDeleteUnusedFile_1(t *testing.T) {
 	helpers.Config.DeleteAfterSecondsLastAccessed = 10
 
 	simpleStoredFiled := models.StoredFile{
-		Key:        models.DB.FindUnsedKey(),
+		Key:        models.DB.FindUnusedKey(),
 		DeleteKey:  helpers.RandomString(helpers.Config.DeleteKeySize),
 		FileName:   "deleteFile",
 		FileSize:   1024,

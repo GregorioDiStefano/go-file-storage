@@ -26,27 +26,22 @@ func SimpleUpload(c *gin.Context) {
 	}
 
 	fn := c.Param("filename")
-	key := models.DB.FindUnsedKey()
+	key := models.DB.FindUnusedKey()
 	deleteKey := helpers.RandomString(helpers.Config.DeleteKeySize)
 
-	if helpers.Config.StorageMethod == LOCAL {
-		processUpload(c.Request.Body, key, fn)
-	} else if helpers.Config.StorageMethod == S3 {
-		if err := processUploadS3(c.Request.Body, key, fn); err != nil {
-			helpers.Log.Fatalln("Uploading file to S3 bucket failed.")
-			sendError(c, "Uploading file to S3 bucket failed!")
-			return
-		}
+	if err := processUploadS3(c.Request.Body, key, fn); err != nil {
+		helpers.Log.Fatalln("Uploading file to S3 bucket failed.")
+		sendError(c, "Uploading file to S3 bucket failed!")
+		return
 	}
 
 	simpleStoredFiled := models.StoredFile{
-		Key:           key,
-		DeleteKey:     deleteKey,
-		FileName:      fn,
-		FileSize:      c.Request.ContentLength,
-		UploadTime:    time.Now().UTC(),
-		LastAccess:    time.Now().UTC(),
-		StorageMethod: helpers.Config.StorageMethod,
+		Key:        key,
+		DeleteKey:  deleteKey,
+		FileName:   fn,
+		FileSize:   c.Request.ContentLength,
+		UploadTime: time.Now().UTC(),
+		LastAccess: time.Now().UTC(),
 	}
 
 	models.DB.WriteStoredFile(simpleStoredFiled)

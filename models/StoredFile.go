@@ -3,7 +3,6 @@ package models
 import (
 	"encoding/json"
 	"errors"
-	_ "fmt"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -24,15 +23,14 @@ type Database struct {
 }
 
 type StoredFile struct {
-	Key           string
-	FileName      string
-	FileSize      int64
-	DeleteKey     string
-	Deleted       bool
-	Downloads     int64
-	LastAccess    time.Time
-	UploadTime    time.Time
-	StorageMethod string
+	Key        string
+	FileName   string
+	FileSize   int64
+	DeleteKey  string
+	Deleted    bool
+	Downloads  int64
+	LastAccess time.Time
+	UploadTime time.Time
 }
 
 var DB = Database{Filename: DbFilename, Bucket: Bucket}
@@ -49,7 +47,7 @@ func (database *Database) CloseDatabaseFile() {
 	DB.CloseDatabaseFile()
 }
 
-func (database *Database) FindUnsedKey() string {
+func (database *Database) FindUnusedKey() string {
 	count := 0
 	possibleKey := helpers.RandomString(helpers.Config.KeySize)
 	for database.DoesKeyExist(possibleKey) {

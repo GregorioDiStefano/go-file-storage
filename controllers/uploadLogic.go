@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -44,20 +43,4 @@ func processUploadS3(data io.ReadCloser, key string, fn string) error {
 	}
 
 	return nil
-}
-
-func processUpload(data io.ReadCloser, key string, fn string) {
-	directoryToCreate := fmt.Sprintf("%s/%s/", helpers.Config.StorageFolder, key)
-	fileToCreate := fmt.Sprintf("%s/%s/%s", helpers.Config.StorageFolder, key, fn)
-
-	os.Mkdir(directoryToCreate, 0777)
-
-	f, err := os.OpenFile(fileToCreate, os.O_CREATE|os.O_WRONLY, 0777)
-	defer f.Close()
-
-	if err != nil {
-		panic(err)
-	}
-
-	io.Copy(f, data)
 }

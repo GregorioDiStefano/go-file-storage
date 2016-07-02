@@ -2,11 +2,9 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -47,7 +45,6 @@ func DownloadFile(c *gin.Context) {
 
 	helpers.Log.WithFields(log.Fields{"key": key, "fn": fn}).Info("Incoming download.")
 
-	var expectedFilePath string
 	sf := models.DB.ReadStoredFile(key)
 
 	if !models.DB.DoesKeyExist(key) || sf == nil || sf.Deleted || sf.FileName != fn {
@@ -58,19 +55,6 @@ func DownloadFile(c *gin.Context) {
 		}
 		sendError(c, "Invalid filename, key, or file is deleted")
 		return
-	}
-
-	if sf.StorageMethod == LOCAL {
-		expectedFilePath = fmt.Sprintf("%s/%s/%s",
-			helpers.Config.StorageFolder,
-			key,
-			fn)
-
-		if _, err := os.Stat(expectedFilePath); os.IsNotExist(err) {
-			helpers.Log.WithFields(log.Fields{"expected file path": expectedFilePath}).Info("file not found on filesystem!")
-			sendError(c, "File does not exist")
-			return
-		}
 	}
 
 	sf.LastAccess = time.Now().UTC()
@@ -95,15 +79,8 @@ func DownloadFile(c *gin.Context) {
 
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 
-	if sf.StorageMethod == S3 {
-		ip := c.ClientIP()
-		helpers.Log.WithFields(log.Fields{"ip": ip, "key": key, "fn": fn}).Info("S3 download started.")
-		c.Redirect(http.StatusMovedPermanently, helpers.GetS3SignedURL(sf.Key, sf.FileName, ip))
-		return
-	} else if sf.StorageMethod == LOCAL {
-		helpers.Log.WithFields(log.Fields{"key": key, "fn": fn}).Info("S3 download started.")
-		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", sf.FileName))
-		c.File(expectedFilePath)
-		return
-	}
+	ip := c.ClientIP()
+	helpers.Log.WithFields(log.Fields{"ip": ip, "key": key, "fn": fn}).Info("S3 download started.")
+	c.Redirect(http.StatusMovedPermanently, helpers.GetS3SignedURL(sf.Key, sf.FileName, ip))
+	return
 }

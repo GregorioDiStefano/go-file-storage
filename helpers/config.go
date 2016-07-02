@@ -30,7 +30,6 @@ type Configuration struct {
 	CloudFrontKeyID              string
 	CloudFrontURL                string
 
-	StorageMethod string
 	StorageFolder string
 }
 

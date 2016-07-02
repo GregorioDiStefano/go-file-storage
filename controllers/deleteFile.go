@@ -1,14 +1,10 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
-	"os"
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/gin-gonic/gin"
 )
@@ -16,15 +12,6 @@ import (
 func deleteS3File(key, filename string) error {
 	//TODO: implement this later
 	return nil
-}
-
-func deleteLocalFile(filePath string) error {
-	if _, err := os.Stat(filePath); err == nil {
-		os.Remove(filePath)
-		return nil
-	} else {
-		return errors.New("Failed to delete file")
-	}
 }
 
 func DeleteFile(c *gin.Context) {
@@ -47,18 +34,7 @@ func DeleteFile(c *gin.Context) {
 			return
 		}
 
-		var deleteErr error
-		if sf.StorageMethod == LOCAL {
-			filePath := fmt.Sprintf("%s/%s/%s",
-				helpers.Config.StorageFolder,
-				key,
-				sf.FileName)
-			deleteErr = deleteLocalFile(filePath)
-		} else if sf.StorageMethod == S3 {
-			deleteErr = deleteS3File(key, fileName)
-		}
-
-		if deleteErr != nil {
+		if err := deleteS3File(key, fileName); err != nil {
 			//log.WithFields(log.Fields{"key" : key, "delete_key": deleteKey, "fn": fileName}).Infoln("Delete key or filename was incorrect")
 			sendError(c, "Failed to delete file")
 			return

@@ -12,7 +12,6 @@
     "CAPTCHA_SECRET": "environment",
     "AWS_ACCESS_KEY_ID": "environment",
     "AWS_SECRET_ACCESS_KEY": "environment",
-    "StorageMethod" : "S3",
     "CloudFrontPrivateKeyLocation": "./config/pk-APKAIWSICRWRZP4KRDWA.pem",
     "S3BucketName": "greg-filestorage",
     "AWSRegion": "eu-west-1",
