@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/stretchr/testify/assert"
 )

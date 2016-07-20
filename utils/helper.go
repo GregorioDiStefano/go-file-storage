@@ -1,4 +1,4 @@
-package helpers
+package utils
 
 import (
 	"fmt"
@@ -60,7 +60,7 @@ func IsWebBrowser(userAgent string) bool {
 }
 
 func GetS3SignedURL(key string, filename, ip string) string {
-	privKey, err := sign.LoadPEMPrivKeyFile(Config.CloudFrontPrivateKeyLocation)
+	privKey, err := sign.LoadPEMPrivKeyFile(Config.GetString("aws.cf_key_location"))
 
 	var signedURL string
 
@@ -68,11 +68,13 @@ func GetS3SignedURL(key string, filename, ip string) string {
 		fmt.Println(err)
 	}
 
-	signer := sign.NewURLSigner(Config.CloudFrontKeyID, privKey)
+	signer := sign.NewURLSigner(Config.GetString("aws.cf_key_id"), privKey)
 	filenameEscaped := url.QueryEscape(filename)
-	s3URL := fmt.Sprintf("https://%s/%s/%s", Config.CloudFrontURL, key, filenameEscaped)
+	s3URL := fmt.Sprintf("https://%s/%s/%s", Config.GetString("aws.cf_url"), key, filenameEscaped)
 
-	if len(ip) > 0 {
+	if len(ip) == 0 || strings.HasPrefix(ip, "127.") || strings.HasPrefix(ip, "10.") || strings.HasPrefix(ip, "192.168.") || strings.HasPrefix(ip, "172.16.") || strings.HasPrefix(ip, "172.32.") {
+		signedURL, err = signer.Sign(s3URL, time.Now().Add(1*time.Hour))
+	} else {
 		policy := &sign.Policy{
 			Statements: []sign.Statement{
 				{
@@ -85,8 +87,6 @@ func GetS3SignedURL(key string, filename, ip string) string {
 			},
 		}
 		signedURL, err = signer.SignWithPolicy(s3URL, policy)
-	} else {
-		signedURL, err = signer.Sign(s3URL, time.Now().Add(1*time.Hour))
 	}
 
 	if err != nil {

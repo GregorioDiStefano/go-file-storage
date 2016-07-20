@@ -1,0 +1,16 @@
+---
+aws:
+  bucket: greg-filestorage
+  cf_key_id: APKAIWSICRWRZP4KRDWA
+  cf_key_location: ./config/pk-APKAIWSICRWRZP4KRDWA.pem
+  cf_url: dssdldrogwhnn.cloudfront.net
+  region: eu-west-1
+
+port: 127.0.0.1:8080
+file_check_freq: 10000
+max_downloads: 100
+delete_key_size: 8
+key_size: 4
+domain: "grabfile.io"
+max_file_size: 10000000
+delete_after_seconds: 60

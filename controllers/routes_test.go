@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
+	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -85,7 +85,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	helpers.ParseConfig("config/config.testing.json")
+	utils.ParseConfig("config/config.testing.yaml")
 	models.DB.OpenDatabaseFile()
 
 	r = gin.Default()
@@ -93,7 +93,7 @@ func TestMain(m *testing.M) {
 	r.LoadHTMLGlob("templates/*")
 
 	r.PUT("/:filename", func(c *gin.Context) {
-		SimpleUpload(c)
+		Upload(c)
 	})
 
 	r.DELETE("/:key/:delete_key/:filename", func(c *gin.Context) {
@@ -138,7 +138,7 @@ func TestUpload_10MB(t *testing.T) {
 }
 
 func TestUploadEqualMaxSize(t *testing.T) {
-	maxUploadSize := helpers.Config.MaxSize
+	maxUploadSize := utils.Config.GetInt("max_file_size")
 
 	if maxUploadSize >= (1 * 1024 * 1024 * 1024) {
 		t.Skip("maxUploadSize is huge, skipping")
@@ -156,7 +156,7 @@ func TestUploadEqualMaxSize(t *testing.T) {
 }
 
 func TestUploadExceedingMaxSize(t *testing.T) {
-	maxUploadSize := helpers.Config.MaxSize
+	maxUploadSize := utils.Config.GetInt("max_file_size")
 
 	if maxUploadSize >= (1 * 1024 * 1024 * 1024) {
 		t.Skip("maxUploadSize is huge, skipping")
@@ -174,24 +174,25 @@ func TestUploadExceedingMaxSize(t *testing.T) {
 
 func TestInvalidDownload_1(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024*1024), "test")
-	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, utils.Config.GetString("domain"), "", 1))
 
 	key := downloadURL["key"]
 	invalidFilename := downloadURL["filename"] + ".x"
 
-	invalidDownloadURL := fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, invalidFilename)
+	invalidDownloadURL := fmt.Sprintf("%s/%s/%s", utils.Config.GetString("domain"), key, invalidFilename)
+
 	_, _, statusCode := performRequest(r, "GET", invalidDownloadURL, nil)
 	assert.Equal(t, http.StatusForbidden, statusCode)
 }
 
 func TestInvalidDownload_2(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0x00, 0x11}, 1024*1024), "test")
-	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+	downloadURL := downloadPathToMap(strings.Replace(ufl.downloadURL, utils.Config.GetString("domain"), "", 1))
 
 	key := downloadURL["key"] + "foo"
 	invalidFilename := downloadURL["filename"]
 
-	invalidDownloadURL := fmt.Sprintf("%s/%s/%s", helpers.Config.Domain, key, invalidFilename)
+	invalidDownloadURL := fmt.Sprintf("%s/%s/%s", utils.Config.GetString("domain"), key, invalidFilename)
 	_, _, statusCode := performRequest(r, "GET", invalidDownloadURL, nil)
 	assert.Equal(t, http.StatusForbidden, statusCode)
 }
@@ -200,18 +201,18 @@ func TestMaxDownloads(t *testing.T) {
 	db := models.Database{Filename: models.DbFilename, Bucket: models.Bucket}
 	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33, 0xff}, 1024), "test")
 
-	for i := int64(1); i <= helpers.Config.MaxDownloadsBeforeInteraction; i++ {
+	for i := int64(1); i <= int64(utils.Config.GetInt("max_downloads")); i++ {
 		respBytes, _, statusCode := performRequest(r, "GET", ufl.downloadURL, nil)
 		assert.Equal(t, ufl.payload, respBytes)
 		assert.Equal(t, http.StatusOK, statusCode)
 	}
 
-	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, utils.Config.GetString("domain"), "", 1))
 	downloadsStoredInDB := db.ReadStoredFile(downloadURLPath["key"]).Downloads
-	assert.Equal(t, helpers.Config.MaxDownloadsBeforeInteraction, downloadsStoredInDB)
+	assert.Equal(t, utils.Config.GetInt("max_downloads"), int(downloadsStoredInDB))
 
 	_, _, statusCode := performRequest(r, "GET", ufl.downloadURL, nil)
-	downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+	downloadPathToMap(strings.Replace(ufl.downloadURL, utils.Config.GetString("domain"), "", 1))
 	assert.Equal(t, http.StatusForbidden, statusCode)
 }
 
@@ -230,7 +231,7 @@ func TestDeleteFile(t *testing.T) {
 
 func TestDownloadLastAccess(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 10), "test")
-	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, utils.Config.GetString("domain"), "", 1))
 	performRequest(r, "GET", ufl.downloadURL, nil)
 	expectedTime := models.DB.ReadStoredFile(downloadURLPath["key"]).LastAccess.Unix()
 	assert.True(t, expectedTime == time.Now().Unix() || expectedTime+1 == time.Now().Unix())
@@ -238,7 +239,7 @@ func TestDownloadLastAccess(t *testing.T) {
 
 func TestDownloadDeletedFile(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0xff}, 1024), "random.ext")
-	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, helpers.Config.Domain, "", 1))
+	downloadURLPath := downloadPathToMap(strings.Replace(ufl.downloadURL, utils.Config.GetString("domain"), "", 1))
 
 	storedFile := models.DB.ReadStoredFile(downloadURLPath["key"])
 	storedFile.Deleted = true
@@ -258,26 +259,26 @@ func TestUploadDownloadUnicode(t *testing.T) {
 
 func TestDeleteInvalid_1(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024), "test")
-	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, helpers.Config.Domain, "", 1))
+	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, utils.Config.GetString("domain"), "", 1))
 
 	key := deleteURL["key"]
 	deleteKey := deleteURL["deleteKey"]
 	invalidFilename := deleteURL["filename"] + ".x"
 
-	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, key, deleteKey, invalidFilename)
+	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", utils.Config.GetString("domain"), key, deleteKey, invalidFilename)
 	_, _, statusCode := performRequest(r, "DELETE", invalidDeleteURL, nil)
 	assert.Equal(t, http.StatusForbidden, statusCode)
 }
 
 func TestDeleteInvalid_2(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024), "test")
-	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, helpers.Config.Domain, "", 1))
+	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, utils.Config.GetString("domain"), "", 1))
 
 	key := deleteURL["key"]
 	invalidDeleteKey := deleteURL["deleteKey"] + ".x"
 	filename := deleteURL["filename"]
 
-	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, key, invalidDeleteKey, filename)
+	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", utils.Config.GetString("domain"), key, invalidDeleteKey, filename)
 
 	_, _, statusCode := performRequest(r, "DELETE", invalidDeleteURL, nil)
 	assert.Equal(t, http.StatusForbidden, statusCode)
@@ -285,13 +286,13 @@ func TestDeleteInvalid_2(t *testing.T) {
 
 func TestDeleteInvalid_3(t *testing.T) {
 	ufl := uploadFile(bytes.Repeat([]byte{0x11, 0x22, 0x33}, 1024), "test")
-	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, helpers.Config.Domain, "", 1))
+	deleteURL := deletePathToMap(strings.Replace(ufl.deleteURL, utils.Config.GetString("domain"), "", 1))
 
 	invalidKey := deleteURL["key"] + ".x"
 	deleteKey := deleteURL["deleteKey"]
 	filename := deleteURL["filename"]
 
-	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", helpers.Config.Domain, invalidKey, deleteKey, filename)
+	invalidDeleteURL := fmt.Sprintf("%s/%s/%s/%s", utils.Config.GetString("domain"), invalidKey, deleteKey, filename)
 	_, _, statusCode := performRequest(r, "DELETE", invalidDeleteURL, nil)
 	assert.Equal(t, http.StatusForbidden, statusCode)
 }
