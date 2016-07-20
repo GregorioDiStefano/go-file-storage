@@ -7,7 +7,7 @@ import (
 
 	"github.com/boltdb/bolt"
 
-	"github.com/GregorioDiStefano/go-file-storage/helpers"
+	"github.com/GregorioDiStefano/go-file-storage/utils"
 )
 
 var boltdb *bolt.DB
@@ -49,9 +49,10 @@ func (database *Database) CloseDatabaseFile() {
 
 func (database *Database) FindUnusedKey() string {
 	count := 0
-	possibleKey := helpers.RandomString(helpers.Config.KeySize)
+	keySize := uint8(utils.Config.GetInt("key_size"))
+	possibleKey := utils.RandomString(keySize)
 	for database.DoesKeyExist(possibleKey) {
-		possibleKey = helpers.RandomString(helpers.Config.KeySize + uint8(count/10))
+		possibleKey = utils.RandomString(keySize + uint8(count/10))
 		count++
 	}
 	return possibleKey

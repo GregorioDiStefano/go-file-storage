@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GregorioDiStefano/go-file-storage/helpers"
 	"github.com/GregorioDiStefano/go-file-storage/models"
+	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
