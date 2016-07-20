@@ -6,21 +6,19 @@ import (
 	"time"
 
 	"github.com/GregorioDiStefano/go-file-storage/models"
+	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
-	helpers.ParseConfig("config/config.testing.json")
+	utils.ParseConfig("config/config.testing.yaml")
 	os.Exit(m.Run())
 }
 
 func TestDeleteUnusedFile_1(t *testing.T) {
-	helpers.Config.FileCheckFrequency = 1
-	helpers.Config.DeleteAfterSecondsLastAccessed = 10
-
 	simpleStoredFiled := models.StoredFile{
 		Key:        models.DB.FindUnusedKey(),
-		DeleteKey:  helpers.RandomString(helpers.Config.DeleteKeySize),
+		DeleteKey:  utils.RandomString(uint8(utils.Config.GetInt("DeleteKeySize"))),
 		FileName:   "deleteFile",
 		FileSize:   1024,
 		UploadTime: time.Now().UTC(),
@@ -32,10 +30,10 @@ func TestDeleteUnusedFile_1(t *testing.T) {
 
 	go deleteUnusedFile()
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(15 * time.Second)
 	//after 5 seconds, the file will still be here
 	assert.False(t, sf.Deleted)
-	time.Sleep(15 * time.Second)
+	time.Sleep(35 * time.Second)
 	//but now it should be gone.
 	sf = models.DB.ReadStoredFile(simpleStoredFiled.Key)
 	assert.True(t, sf.Deleted)
