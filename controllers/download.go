@@ -43,6 +43,7 @@ func DownloadFile(c *gin.Context) {
 	googleCaptchaCode := c.Query("g-recaptcha-response")
 
 	utils.Log.WithFields(log.Fields{"key": key, "fn": fn}).Info("Incoming download.")
+
 	sf := models.DB.ReadStoredFile(key)
 
 	if !models.DB.DoesKeyExist(key) || sf == nil || sf.Deleted || sf.FileName != fn {

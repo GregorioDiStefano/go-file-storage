@@ -70,6 +70,7 @@ func GetS3SignedURL(key string, filename, ip string) string {
 
 	signer := sign.NewURLSigner(Config.GetString("aws.cf_key_id"), privKey)
 	filenameEscaped := url.QueryEscape(filename)
+
 	s3URL := fmt.Sprintf("https://%s/%s/%s", Config.GetString("aws.cf_url"), key, filenameEscaped)
 
 	if len(ip) == 0 || strings.HasPrefix(ip, "127.") || strings.HasPrefix(ip, "10.") || strings.HasPrefix(ip, "192.168.") || strings.HasPrefix(ip, "172.16.") || strings.HasPrefix(ip, "172.32.") {

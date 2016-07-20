@@ -6,21 +6,23 @@ import (
 	"time"
 
 	"github.com/GregorioDiStefano/go-file-storage/models"
+	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
-	helpers.ParseConfig("config/config.testing.json")
+	utils.ParseConfig("config/config.testing.json")
 	os.Exit(m.Run())
 }
 
 func TestDeleteUnusedFile_1(t *testing.T) {
-	helpers.Config.FileCheckFrequency = 1
-	helpers.Config.DeleteAfterSecondsLastAccessed = 10
+	utils.Config.Set("FileCheckFrequency", 1)
+	utils.Config.Set("DeleteAfterSecondsLastAccessed", 30)
+	utils.Config.Set("DeleteKeySize", 6)
 
 	simpleStoredFiled := models.StoredFile{
 		Key:        models.DB.FindUnusedKey(),
-		DeleteKey:  helpers.RandomString(helpers.Config.DeleteKeySize),
+		DeleteKey:  utils.RandomString(uint8(utils.Config.GetInt("DeleteKeySize"))),
 		FileName:   "deleteFile",
 		FileSize:   1024,
 		UploadTime: time.Now().UTC(),
