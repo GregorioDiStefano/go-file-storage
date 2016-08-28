@@ -14,38 +14,60 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Uploader interface {
-	upload(io.ReadCloser, string, string)
+type GenericUploader interface {
+	UploadFile(c *gin.Context)
+	doActualUpload(data io.ReadCloser, key string, fn string) error
+
+	doActualDelete(deleteKey, fileKey, filename string) error
 }
 
-func checkUploadSize(size uint64) error {
-	maxFileSize := uint64(utils.Config.GetInt("max_file_size"))
-	if size > maxFileSize || size <= 0 {
-		fmt.Printf("File upload was :%d, while max size allowed is: %d\n", maxFileSize)
+type Upload struct {
+	awsBucket     string
+	awsRegion     string
+	maxUploadSize int64
+	deleteKeySize int
+
+	uploadDomain string
+}
+
+func NewUploader(uploadDomain string, maxUploadSize int64, deleteKeySize int, awsBucket, awsRegion string) *Upload {
+	return &Upload{uploadDomain: uploadDomain,
+		maxUploadSize: maxUploadSize,
+		deleteKeySize: deleteKeySize,
+		awsBucket:     awsBucket,
+		awsRegion:     awsRegion}
+}
+
+func checkUploadSize(actualSize, maxFileSize int64) error {
+	if actualSize > maxFileSize || actualSize <= 0 {
+		fmt.Printf("File upload was :%d, while max size allowed is: %d\n", actualSize, maxFileSize)
 		return errors.New("File too large")
 	}
 	return nil
 }
 
-func Upload(c *gin.Context) {
-	s3upload := S3Upload{}
-
+func (upload Upload) UploadFile(c *gin.Context) {
 	uploadFileSize := c.Request.ContentLength
 
-	if err := checkUploadSize(uint64(uploadFileSize)); err != nil {
+	if err := checkUploadSize(uploadFileSize, upload.maxUploadSize); err != nil {
 		sendError(c, "Upload size either too larger or invalid")
 		return
 	}
 
 	fn := c.Param("filename")
 	key := models.DB.FindUnusedKey()
-	deleteKey := utils.RandomString(uint8(utils.Config.GetInt("delete_key_size")))
+	deleteKey := utils.RandomString(utils.Config.GetInt("delete_key_size"))
 
-	if err := s3upload.upload(c.Request.Body, key, fn); err != nil {
+	fmt.Print("do we get here")
+
+	if err := upload.doActualUpload(c.Request.Body, key, fn); err != nil {
 		utils.Log.Fatalln("Uploading file to S3 bucket failed.")
 		sendError(c, "Uploading file to S3 bucket failed!")
+		fmt.Println("sent error")
 		return
 	}
+
+	fmt.Print("do we get here")
 
 	simpleStoredFiled := models.StoredFile{
 		Key:        key,
@@ -59,8 +81,8 @@ func Upload(c *gin.Context) {
 	models.DB.WriteStoredFile(simpleStoredFiled)
 
 	returnJSON := make(map[string]string)
-	returnJSON["downloadURL"] = fmt.Sprintf("%s/%s/%s", utils.Config.GetString("domain"), key, fn)
-	returnJSON["deleteURL"] = fmt.Sprintf("%s/%s/%s/%s", utils.Config.GetString("domain"), key, deleteKey, fn)
+	returnJSON["downloadURL"] = fmt.Sprintf("%s/%s/%s", upload.uploadDomain, key, fn)
+	returnJSON["deleteURL"] = fmt.Sprintf("%s/%s/%s/%s", upload.uploadDomain, key, deleteKey, fn)
 	utils.Log.WithFields(log.Fields{"key": key, "deleteKey": deleteKey, "fn": fn}).Infoln("Upload successful.")
 	c.JSON(http.StatusCreated, returnJSON)
 }

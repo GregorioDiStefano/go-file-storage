@@ -2,7 +2,6 @@ language: go
 services:
 - docker
 go:
-- release
 - tip
 env:
   global:

@@ -24,7 +24,7 @@ func TestDeleteUnusedFile_1(t *testing.T) {
 
 	simpleStoredFiled := models.StoredFile{
 		Key:        models.DB.FindUnusedKey(),
-		DeleteKey:  utils.RandomString(uint8(utils.Config.GetInt("DeleteKeySize"))),
+		DeleteKey:  utils.RandomString(utils.Config.GetInt("DeleteKeySize")),
 		FileName:   "deleteFile",
 		FileSize:   1024,
 		UploadTime: time.Now().UTC(),

@@ -30,11 +30,11 @@ func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{})
 }
 
-func RandomString(length uint8) string {
+func RandomString(length int) string {
 	possibleCharacters := "123456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 	var tmp []byte
 
-	for i := uint8(0); i < length; i++ {
+	for i := int(0); i < length; i++ {
 		idx := rand.Intn(len(possibleCharacters))
 		tmp = append(tmp, possibleCharacters[idx])
 	}

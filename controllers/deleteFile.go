@@ -9,12 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func deleteS3File(key, filename string) error {
-	//TODO: implement this later
-	return nil
+type Delete struct {
+	uploader GenericUploader
 }
 
-func DeleteFile(c *gin.Context) {
+func NewDeleter(uploader Upload) *Delete {
+	return &Delete{uploader}
+}
+
+func (delete Delete) DeleteFile(c *gin.Context) {
 	key := c.Param("key")
 	deleteKey := c.Param("delete_key")
 	fileName := c.Param("filename")
@@ -34,7 +37,7 @@ func DeleteFile(c *gin.Context) {
 			return
 		}
 
-		if err := deleteS3File(key, fileName); err != nil {
+		if err := delete.uploader.doActualDelete(deleteKey, key, fileName); err != nil {
 			//log.WithFields(log.Fields{"key" : key, "delete_key": deleteKey, "fn": fileName}).Infoln("Delete key or filename was incorrect")
 			sendError(c, "Failed to delete file")
 			return

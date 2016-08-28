@@ -8,7 +8,7 @@ aws:
 
 
 port: 127.0.0.1:8080
-file_check_freq: 1
+file_check_freq: 10
 max_downloads: 10
 delete_key_size: 8
 key_size: 4

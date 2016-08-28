@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -18,8 +19,9 @@ const (
 )
 
 type Database struct {
-	Filename string
-	Bucket   string
+	Filename   string
+	Bucket     string
+	MaxKeySize int
 }
 
 type StoredFile struct {
@@ -28,12 +30,16 @@ type StoredFile struct {
 	FileSize   int64
 	DeleteKey  string
 	Deleted    bool
-	Downloads  int64
+	Downloads  int
 	LastAccess time.Time
 	UploadTime time.Time
 }
 
-var DB = Database{Filename: DbFilename, Bucket: Bucket}
+var DB Database
+
+func (database *Database) Setup(key_size int) {
+	DB = Database{Filename: DbFilename, Bucket: Bucket, MaxKeySize: key_size}
+}
 
 func (database *Database) OpenDatabaseFile() {
 	var err error
@@ -44,15 +50,16 @@ func (database *Database) OpenDatabaseFile() {
 }
 
 func (database *Database) CloseDatabaseFile() {
-	DB.CloseDatabaseFile()
+	database.CloseDatabaseFile()
 }
 
 func (database *Database) FindUnusedKey() string {
 	count := 0
-	keySize := uint8(utils.Config.GetInt("key_size"))
+	keySize := database.MaxKeySize
+	fmt.Println(keySize)
 	possibleKey := utils.RandomString(keySize)
 	for database.DoesKeyExist(possibleKey) {
-		possibleKey = utils.RandomString(keySize + uint8(count/10))
+		possibleKey = utils.RandomString(keySize + (count / 10))
 		count++
 	}
 	return possibleKey
@@ -123,6 +130,12 @@ func (database *Database) GetAllKeys() *[]string {
 	var totalKeys []string
 	boltdb.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(database.Bucket))
+
+		if b == nil {
+			fmt.Printf("Bucket: %s does not exist", database.Bucket)
+			return nil
+		}
+
 		c := b.Cursor()
 
 		for k, _ := c.First(); k != nil; k, _ = c.Next() {

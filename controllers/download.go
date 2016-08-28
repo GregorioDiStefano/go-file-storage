@@ -2,18 +2,28 @@ package controller
 
 import (
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func checkCaptcha(gRecaptchaResponse string) bool {
+type Download struct {
+	CaptchaSecret string
+	MaxDownloads  int
+}
+
+func NewDownloader(captchaSecret string, maxDownloads int) *Download {
+	return &Download{captchaSecret, maxDownloads}
+}
+
+func (download Download) checkCaptcha(gRecaptchaResponse string) bool {
 	secret := utils.Config.GetString("CAPTCHA_SECRET")
 	response := gRecaptchaResponse
 
@@ -37,7 +47,7 @@ func checkCaptcha(gRecaptchaResponse string) bool {
 	return false
 }
 
-func DownloadFile(c *gin.Context) {
+func (download Download) DownloadFile(c *gin.Context) {
 	key := c.Param("key")
 	fn := c.Param("filename")
 	googleCaptchaCode := c.Query("g-recaptcha-response")
@@ -59,7 +69,7 @@ func DownloadFile(c *gin.Context) {
 	sf.LastAccess = time.Now().UTC()
 
 	//if file has been download too many times, show this page, with requires a captcha to be solved
-	if sf.Downloads >= int64(utils.Config.GetInt("max_downloads")) && !checkCaptcha(googleCaptchaCode) {
+	if sf.Downloads >= download.MaxDownloads && !download.checkCaptcha(googleCaptchaCode) {
 		if utils.IsWebBrowser(c.Request.Header.Get("User-Agent")) {
 			c.HTML(http.StatusOK, "download.tmpl", gin.H{
 				"filename": fn,

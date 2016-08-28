@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,13 +20,6 @@ func init() {
 
 	var DB = Database{Filename: DbFilename, Bucket: Bucket}
 	DB.OpenDatabaseFile()
-}
-
-func TestFindUnusedKey(t *testing.T) {
-	//make helpers.RandomString return a key that exists,
-
-	//DB.OpenDatabaseFile()
-
 }
 
 func TestWriteStoredFile(t *testing.T) {
@@ -61,4 +55,12 @@ func TestDoesKeyExist(t *testing.T) {
 	for _, s := range *DB.GetAllKeys() {
 		assert.True(t, DB.DoesKeyExist(s))
 	}
+}
+
+func TestFindUnusedKey(t *testing.T) {
+	utils.Config.Set("key_size", 1)
+	DB.FindUnusedKey()
+	//make helpers.RandomString return a key that exists,
+
+	//DB.OpenDatabaseFile()
 }

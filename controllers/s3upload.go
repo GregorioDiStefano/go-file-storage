@@ -7,20 +7,16 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-
-	"github.com/GregorioDiStefano/go-file-storage/utils"
 )
 
-type S3Upload struct{}
+func (upload Upload) doActualUpload(data io.ReadCloser, key string, fn string) error {
+	//TODO:why no recovery when crash here? ex: failed DNS lookup.
 
-func (s3up S3Upload) upload(data io.ReadCloser, key string, fn string) error {
-	awsRegion := utils.Config.GetString("aws.region")
-	awsBucket := utils.Config.GetString("aws.bucket")
+	s3uploader := s3manager.NewUploader(session.New(&aws.Config{Region: aws.String(upload.awsRegion)}))
 
-	uploader := s3manager.NewUploader(session.New(&aws.Config{Region: aws.String(awsRegion)}))
-	_, err := uploader.Upload(&s3manager.UploadInput{
+	_, err := s3uploader.Upload(&s3manager.UploadInput{
 		Body:   data,
-		Bucket: aws.String(awsBucket),
+		Bucket: aws.String(upload.awsBucket),
 		Key:    aws.String(fmt.Sprintf("%s/%s", key, fn)),
 	})
 
@@ -28,5 +24,9 @@ func (s3up S3Upload) upload(data io.ReadCloser, key string, fn string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (upload Upload) doActualDelete(deleteKey, fileKey, filename string) error {
 	return nil
 }
