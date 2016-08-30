@@ -7,8 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-
+	"github.com/GregorioDiStefano/go-file-storage/log"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/gin-gonic/gin"
@@ -52,15 +51,15 @@ func (download Download) DownloadFile(c *gin.Context) {
 	fn := c.Param("filename")
 	googleCaptchaCode := c.Query("g-recaptcha-response")
 
-	utils.Log.WithFields(log.Fields{"key": key, "fn": fn}).Info("Incoming download.")
+	log.WithFields(log.Fields{"key": key, "fn": fn}).Info("Incoming download.")
 
 	sf := models.DB.ReadStoredFile(key)
 
 	if !models.DB.DoesKeyExist(key) || sf == nil || sf.Deleted || sf.FileName != fn {
 		if sf == nil {
-			utils.Log.WithFields(log.Fields{"key": key, "fn": fn}).Error("Download failed since key doesn't exist in database")
+			log.WithFields(log.Fields{"key": key, "fn": fn}).Error("Download failed since key doesn't exist in database")
 		} else {
-			utils.Log.WithFields(log.Fields{"key": key, "fn": fn, "delete": sf.Deleted}).Error("Download failed")
+			log.WithFields(log.Fields{"key": key, "fn": fn, "delete": sf.Deleted}).Error("Download failed")
 		}
 		sendError(c, "Invalid filename, key, or file is deleted")
 		return
@@ -77,19 +76,19 @@ func (download Download) DownloadFile(c *gin.Context) {
 			return
 		}
 
-		utils.Log.WithFields(log.Fields{"key": key, "filename": fn}).Info("File downloads exceeded - not web browser")
+		log.WithFields(log.Fields{"key": key, "filename": fn}).Info("File downloads exceeded - not web browser")
 		sendError(c, "This file has been download too many times, visit the URL with a Browser")
 		return
 	}
 
 	sf.Downloads = sf.Downloads + 1
-	utils.Log.WithFields(log.Fields{"key": key, "filename": fn}).Info("Downloads set to ", sf.Downloads)
+	log.WithFields(log.Fields{"key": key, "filename": fn}).Info("Downloads set to ", sf.Downloads)
 	models.DB.WriteStoredFile(*sf)
 
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 
 	ip := c.ClientIP()
-	utils.Log.WithFields(log.Fields{"ip": ip, "key": key, "fn": fn}).Info("S3 download started.")
+	log.WithFields(log.Fields{"ip": ip, "key": key, "fn": fn}).Info("S3 download started.")
 	c.Redirect(http.StatusMovedPermanently, utils.GetS3SignedURL(sf.Key, sf.FileName, ip))
 	return
 }

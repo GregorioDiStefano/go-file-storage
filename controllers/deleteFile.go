@@ -3,8 +3,7 @@ package controller
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
-
+	"github.com/GregorioDiStefano/go-file-storage/log"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/gin-gonic/gin"
 )

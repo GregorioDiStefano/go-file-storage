@@ -16,9 +16,8 @@ import (
 )
 
 func init() {
-
 	log.SetLevel(log.DebugLevel)
-	log.Debug("Starting..")
+	log.Debug("Init running..")
 
 	configFile := os.Getenv("CONFIG_FILE")
 	utils.LoadConfig(configFile)
@@ -32,7 +31,7 @@ func main() {
 
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
-	utils.Log.Info("Starting.....")
+	log.Debug("Starting main...")
 
 	go deleteUnusedFile()
 
@@ -44,7 +43,7 @@ func main() {
 
 	go func() {
 		if client.Ping().Err() != nil {
-			utils.Log.Warningf("Communication with Redis failed!")
+			log.Error("Communication with Redis server failed.")
 		}
 		time.Sleep(5 * time.Minute)
 	}()

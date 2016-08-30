@@ -2,35 +2,18 @@ package utils
 
 import (
 	"fmt"
-	"os"
+	"log"
 
 	"math/rand"
 	"net/url"
-	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/service/cloudfront/sign"
 )
 
-var Log = logrus.New()
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	f, err := os.OpenFile(dir+"/go-file-storage.log", os.O_WRONLY|os.O_CREATE, 0755)
-
-	if err != nil {
-		panic(err)
-	}
-
-	Log.Out = f
-	Log.Level = logrus.InfoLevel
-	logrus.SetFormatter(&logrus.TextFormatter{})
-}
-
 func RandomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
 	possibleCharacters := "123456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 	var tmp []byte
 
@@ -91,7 +74,7 @@ func GetS3SignedURL(key string, filename, ip string) string {
 	}
 
 	if err != nil {
-		Log.Fatalf("Failed to sign url, err: %s\n", err.Error())
+		log.Fatalf("Failed to sign url, err: %s\n", err.Error())
 	}
 
 	return signedURL

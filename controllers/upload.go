@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-
+	"github.com/GregorioDiStefano/go-file-storage/log"
 	"github.com/GregorioDiStefano/go-file-storage/models"
 	"github.com/GregorioDiStefano/go-file-storage/utils"
 	"github.com/gin-gonic/gin"
@@ -58,16 +57,11 @@ func (upload Upload) UploadFile(c *gin.Context) {
 	key := models.DB.FindUnusedKey()
 	deleteKey := utils.RandomString(utils.Config.GetInt("delete_key_size"))
 
-	fmt.Print("do we get here")
-
 	if err := upload.doActualUpload(c.Request.Body, key, fn); err != nil {
-		utils.Log.Fatalln("Uploading file to S3 bucket failed.")
+		log.Error("Uploading file to S3 bucket failed.")
 		sendError(c, "Uploading file to S3 bucket failed!")
-		fmt.Println("sent error")
 		return
 	}
-
-	fmt.Print("do we get here")
 
 	simpleStoredFiled := models.StoredFile{
 		Key:        key,
@@ -83,6 +77,6 @@ func (upload Upload) UploadFile(c *gin.Context) {
 	returnJSON := make(map[string]string)
 	returnJSON["downloadURL"] = fmt.Sprintf("%s/%s/%s", upload.uploadDomain, key, fn)
 	returnJSON["deleteURL"] = fmt.Sprintf("%s/%s/%s/%s", upload.uploadDomain, key, deleteKey, fn)
-	utils.Log.WithFields(log.Fields{"key": key, "deleteKey": deleteKey, "fn": fn}).Infoln("Upload successful.")
+	log.WithFields(log.Fields{"key": key, "deleteKey": deleteKey, "fn": fn}).Infoln("Upload successful.")
 	c.JSON(http.StatusCreated, returnJSON)
 }
