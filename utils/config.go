@@ -13,9 +13,11 @@ var Config viper.Viper
 
 func LoadConfig(filename string) {
 	Config = *viper.New()
+	fmt.Println(os.Getwd())
+	fmt.Println(filename)
 
 	if _, err := os.Stat(filename); err != nil {
-		panic(err)
+		panic("Unable to load config file:" + err.Error())
 	}
 
 	Config.SetConfigFile(filename)

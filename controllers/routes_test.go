@@ -85,23 +85,28 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	utils.ParseConfig("config/config.testing.yaml")
+	utils.LoadConfig("config/config.testing.yaml")
+	models.DB.Setup(utils.Config.GetInt("key_size"))
 	models.DB.OpenDatabaseFile()
 
 	r = gin.Default()
 
 	r.LoadHTMLGlob("templates/*")
 
+	downloader := NewDownloader(utils.Config.GetString("CAPTCHA_SECRET"), utils.Config.GetInt("max_downloads"))
+	uploader := NewUploader(utils.Config.GetString("domain"), utils.Config.GetInt64("max_file_size"), utils.Config.GetInt("delete_key_size"), utils.Config.GetString("aws.bucket"), utils.Config.GetString("aws.region"))
+	deleter := NewDeleter(*uploader)
+
 	r.PUT("/:filename", func(c *gin.Context) {
-		Upload(c)
+		uploader.UploadFile(c)
 	})
 
 	r.DELETE("/:key/:delete_key/:filename", func(c *gin.Context) {
-		DeleteFile(c)
+		deleter.DeleteFile(c)
 	})
 
 	r.GET("/:key/:filename", func(c *gin.Context) {
-		DownloadFile(c)
+		downloader.DownloadFile(c)
 	})
 
 	os.Exit(m.Run())

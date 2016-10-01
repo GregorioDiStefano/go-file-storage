@@ -45,6 +45,7 @@ func (database *Database) OpenDatabaseFile() {
 	var err error
 	boltdb, err = bolt.Open(database.Filename, 0600, nil)
 	if err != nil {
+		fmt.Println("error opening: " + database.Filename)
 		panic(err)
 	}
 }
@@ -56,7 +57,6 @@ func (database *Database) CloseDatabaseFile() {
 func (database *Database) FindUnusedKey() string {
 	count := 0
 	keySize := database.MaxKeySize
-	fmt.Println(keySize)
 	possibleKey := utils.RandomString(keySize)
 	for database.DoesKeyExist(possibleKey) {
 		possibleKey = utils.RandomString(keySize + (count / 10))

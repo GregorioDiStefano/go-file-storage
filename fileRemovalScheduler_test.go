@@ -11,8 +11,8 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	utils.ParseConfig("config/config.testing.yaml")
-
+	configFile := os.Getenv("CONFIG_FILE")
+	utils.LoadConfig(configFile)
 	os.Exit(m.Run())
 }
 
